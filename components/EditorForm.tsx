@@ -17,7 +17,7 @@ import NetworkError from "../errors/NetworkError";
 import { articleQueryOptions } from "../queryOptions/articleQueryOptions";
 import { ErrorDisplay } from "../components/ErrorDisplay";
 import { ArticleType } from "../types/articleTypes";
-import { deepEqual } from "../util/deepEqual";
+import { deepEqual } from "../utils/deepEqual";
 import { useEffect, useState } from "react";
 import { Input } from "../components/Input";
 

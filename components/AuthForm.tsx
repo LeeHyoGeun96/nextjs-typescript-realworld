@@ -1,19 +1,18 @@
-import { Form, Link } from "react-router-dom";
-import NetworkError from "../errors/NetworkError";
-import { ErrorDisplay } from "./ErrorDisplay";
+"use client";
+
+import Link from "next/link";
 import { Input } from "./Input";
 
 interface AuthFormProps {
   type: "login" | "register";
-  errors?: NetworkError;
-  onSubmit?: (data: FormData) => void;
+  onSubmit: (data: FormData) => void;
 }
 
-const AuthForm = ({ type, errors }: AuthFormProps) => {
-  const isLogin = type === "login";
-  const title = isLogin ? "Sign in" : "Sign up";
-  const switchText = isLogin ? "Need an account?" : "Have an account?";
-  const switchLink = isLogin ? "/register" : "/login";
+const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
+  const isLoginForm = type === "login";
+  const title = isLoginForm ? "Sign in" : "Sign up";
+  const switchText = isLoginForm ? "Need an account?" : "Have an account?";
+  const switchLink = isLoginForm ? "/register" : "/login";
 
   return (
     <div className="container mx-auto px-4 pt-4 ">
@@ -25,7 +24,7 @@ const AuthForm = ({ type, errors }: AuthFormProps) => {
             </h2>
             <p className="text-center mt-2">
               <Link
-                to={switchLink}
+                href={switchLink}
                 className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
               >
                 {switchText}
@@ -33,10 +32,8 @@ const AuthForm = ({ type, errors }: AuthFormProps) => {
             </p>
           </header>
 
-          <ErrorDisplay errors={errors} />
-
-          <Form method="post" className="space-y-6">
-            {!isLogin && (
+          <form className="space-y-6" action={onSubmit}>
+            {!isLoginForm && (
               <fieldset className="mb-4">
                 <Input
                   type="text"
@@ -78,7 +75,7 @@ const AuthForm = ({ type, errors }: AuthFormProps) => {
             >
               {title}
             </button>
-          </Form>
+          </form>
         </section>
       </div>
     </div>

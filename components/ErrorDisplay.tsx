@@ -1,5 +1,5 @@
 import NetworkError from "../errors/NetworkError";
-import { formatValidationErrors } from "../util/validationUtils";
+import { formatValidationErrors } from "../utils/validationUtils";
 
 interface ErrorDisplayProps {
   errors: NetworkError | undefined | null;
