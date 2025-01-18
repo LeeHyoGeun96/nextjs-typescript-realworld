@@ -1,3 +1,9 @@
+export interface AuthState {
+  isValid: boolean;
+  errors: Record<string, string>;
+  values: Record<string, string>;
+}
+
 export interface CurrentUserType {
   user: {
     email: string;

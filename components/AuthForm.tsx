@@ -1,18 +1,84 @@
 "use client";
 
 import Link from "next/link";
-import { Input } from "./Input";
+
+import { useActionState, useState } from "react";
+import { AuthState } from "@/types/authTypes";
+import { PasswordStrength } from "./PasswordStrength";
+import { ValidationInput } from "./ValidationInput";
+import { ErrorDisplay } from "./ErrorDisplay";
 
 interface AuthFormProps {
   type: "login" | "register";
-  onSubmit: (data: FormData) => void;
+  onSubmit: (prevState: AuthState, data: FormData) => Promise<AuthState | void>;
 }
 
+interface PasswordState {
+  isValid: boolean;
+  errors: Record<string, string>;
+  values: {
+    password: string;
+    passwordConfirm: string;
+  };
+}
+
+const initialState: AuthState = {
+  isValid: true,
+  errors: {},
+  values: {},
+};
+
 const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
+  const [state, formAction, isPending] = useActionState(
+    async (state: void | AuthState, formData: FormData) => {
+      return onSubmit(state || initialState, formData);
+    },
+    initialState
+  );
+
+  const [passwordState, setPasswordState] = useState<PasswordState>({
+    isValid: true,
+    errors: {},
+    values: {
+      password: "",
+      passwordConfirm: "",
+    },
+  });
   const isLoginForm = type === "login";
   const title = isLoginForm ? "Sign in" : "Sign up";
   const switchText = isLoginForm ? "Need an account?" : "Have an account?";
   const switchLink = isLoginForm ? "/register" : "/login";
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setPasswordState((prev) => {
+      const newState = { ...prev, values: { ...prev.values, [name]: value } };
+
+      // 비밀번호 확인이 있을 때만 검증
+      if (
+        (name === "password" && prev.values.passwordConfirm) ||
+        (name === "passwordConfirm" && prev.values.password)
+      ) {
+        return {
+          ...newState,
+          isValid:
+            newState.values.password !== newState.values.passwordConfirm
+              ? false
+              : true,
+          errors: {
+            ...newState.errors,
+            passwordConfirm:
+              newState.values.password !== newState.values.passwordConfirm
+                ? "비밀번호가 일치하지 않습니다"
+                : "",
+          },
+        };
+      }
+
+      return newState;
+    });
+  };
 
   return (
     <div className="container mx-auto px-4 pt-4 ">
@@ -32,35 +98,67 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
             </p>
           </header>
 
-          <form className="space-y-6" action={onSubmit}>
+          <form className="space-y-6" action={formAction}>
+            <ErrorDisplay authState={state} field="server" />
             {!isLoginForm && (
               <fieldset className="mb-4">
-                <Input
-                  type="text"
-                  name="username"
-                  placeholder="Username"
-                  required
+                <ValidationInput
+                  errors={state}
+                  props={{
+                    type: "text",
+                    name: "username",
+                    placeholder: "Username",
+                    required: true,
+                    defaultValue: state?.values?.username || "",
+                  }}
                 />
               </fieldset>
             )}
             <fieldset className="mb-4">
-              <Input
-                type="email"
-                name="email"
-                placeholder="Email"
-                autoComplete="email"
-                required
+              <ValidationInput
+                errors={state}
+                props={{
+                  type: "email",
+                  name: "email",
+                  placeholder: "Email",
+                  autoComplete: "email",
+                  required: true,
+                  defaultValue: state?.values?.email || "",
+                }}
               />
             </fieldset>
             <fieldset className="mb-4">
-              <Input
-                type="password"
-                name="password"
-                placeholder="Password"
-                autoComplete="current-password"
-                required
+              <ValidationInput
+                errors={state}
+                props={{
+                  type: "password",
+                  name: "password",
+                  placeholder: "Password",
+                  autoComplete: "current-password",
+                  required: true,
+                  onChange: handlePasswordChange,
+                  value: passwordState.values.password,
+                }}
               />
+              {!isLoginForm && (
+                <PasswordStrength password={passwordState.values.password} />
+              )}
             </fieldset>
+            {!isLoginForm && (
+              <fieldset className="mb-4">
+                <ValidationInput
+                  errors={passwordState}
+                  props={{
+                    type: "password",
+                    name: "passwordConfirm",
+                    placeholder: "Password Confirm",
+                    required: true,
+                    onChange: handlePasswordChange,
+                    value: passwordState.values.passwordConfirm,
+                  }}
+                />
+              </fieldset>
+            )}
             <button
               className="w-full py-2 px-4 text-lg 
                   text-white
@@ -70,8 +168,11 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
                   transition-colors duration-200
                   focus:outline-none focus:ring-2 focus:ring-offset-2 
                   focus:ring-green-500 dark:focus:ring-green-400
-                  float-right"
+                  float-right
+                  disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed
+                  "
               type="submit"
+              disabled={isPending || !passwordState.isValid}
             >
               {title}
             </button>
