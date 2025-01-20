@@ -8,6 +8,8 @@
 // import { Input } from "../components/Input";
 // import { useUserStore } from "../store/userStore";
 
+import { logout } from "@/actions/auth";
+
 // const SettingsPage = () => {
 //   const user = useUserStore.getState().user;
 //   const { token, login, logout } = useUserStore();
@@ -196,5 +198,10 @@
 // export default SettingsPage;
 
 export default function SettingsPage() {
-  return <div>SettingsPage</div>;
+  return (
+    <>
+      <h1>SettingsPage</h1>
+      <button onClick={logout}>logout</button>
+    </>
+  );
 }

@@ -77,8 +77,6 @@ export async function signup(_: AuthState, formData: FormData) {
 
   const { error } = await supabase.auth.signUp(data);
 
-  console.log(error?.code);
-
   if (error) {
     const formattedErrors = serverErrorMessages(error?.code);
     return { isValid: false, errors: formattedErrors, values: data };
@@ -105,4 +103,16 @@ export async function signInWithGoogle() {
   if (data.url) {
     redirect(data.url); // use the redirect API for your server framework
   }
+}
+
+export async function logout() {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    throw error;
+  }
+
+  redirect("/");
 }
