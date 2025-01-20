@@ -1,7 +1,5 @@
 // import PagenatedAticles from "../components/PagenatedAticles";
 
-import { createClient } from "@/utils/supabase/server";
-
 // const HomePage = () => {
 //   return (
 //     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -24,12 +22,6 @@ import { createClient } from "@/utils/supabase/server";
 // export default HomePage;
 
 export default async function HomePage() {
-  const supabase = await createClient();
-
-  const { data: user } = await supabase.auth.getUser();
-
-  console.log(user);
-
   return (
     <>
       <div>HomePage</div>
