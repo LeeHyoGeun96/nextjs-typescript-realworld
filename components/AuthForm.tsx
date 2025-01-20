@@ -7,6 +7,7 @@ import { AuthState } from "@/types/authTypes";
 import { PasswordStrength } from "./PasswordStrength";
 import { ValidationInput } from "./ValidationInput";
 import { ErrorDisplay } from "./ErrorDisplay";
+import GoogleLoginBtn from "./GoogleLoginBtn";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -177,6 +178,9 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
               {title}
             </button>
           </form>
+        </section>
+        <section>
+          <GoogleLoginBtn />
         </section>
       </div>
     </div>

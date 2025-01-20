@@ -89,3 +89,20 @@ export async function signup(_: AuthState, formData: FormData) {
 
   redirect("/");
 }
+
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/callback`,
+      skipBrowserRedirect: true,
+    },
+  });
+
+  console.error(error);
+
+  if (data.url) {
+    redirect(data.url); // use the redirect API for your server framework
+  }
+}
