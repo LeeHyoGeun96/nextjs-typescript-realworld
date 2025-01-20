@@ -229,17 +229,19 @@ import Link from "next/link";
 
 // export default ProfilePage;
 
-export default function ProfilePage({
+export default async function ProfilePage({
   params,
 }: {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }) {
+  const { username } = await params;
+
   return (
     <nav>
-      <Link href={`/profile/${params.username}`} className="tab-link">
+      <Link href={`/profile/${username}`} className="tab-link">
         My Articles
       </Link>
-      <Link href={`/profile/${params.username}/favorites`} className="tab-link">
+      <Link href={`/profile/${username}/favorites`} className="tab-link">
         Favorited Articles
       </Link>
     </nav>
