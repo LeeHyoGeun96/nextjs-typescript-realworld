@@ -169,7 +169,6 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
                   transition-colors duration-200
                   focus:outline-none focus:ring-2 focus:ring-offset-2 
                   focus:ring-green-500 dark:focus:ring-green-400
-                  float-right
                   disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed
                   "
               type="submit"
@@ -178,9 +177,12 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
               {title}
             </button>
           </form>
-        </section>
-        <section>
-          <GoogleLoginBtn />
+
+          <section className="mt-8">
+            <div className="mt-6">
+              <GoogleLoginBtn type={type} />
+            </div>
+          </section>
         </section>
       </div>
     </div>

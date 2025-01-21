@@ -27,6 +27,7 @@ export default {
         sans: ["Source Sans Pro", "sans-serif"],
         serif: ["Source Serif Pro", "serif"],
         heading: ["Merriweather Sans", "sans-serif"],
+        roboto: ["Roboto", "sans-serif"],
       },
     },
   },
@@ -42,7 +43,7 @@ export default {
         },
         ".touch-scroll": {
           "-webkit-overflow-scrolling": "touch",
-          "scroll-behavior": "smooth",
+          // "scroll-behavior": "smooth",
         },
       });
     },
