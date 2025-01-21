@@ -1,3 +1,6 @@
+"use client";
+
+import Image from "next/image";
 import { useState } from "react";
 
 interface AvatarProps {
@@ -30,11 +33,14 @@ const Avatar = ({
   };
 
   return (
-    <img
+    <Image
       src={imgError || !image ? defaultImage : image}
       alt={`${username}'s avatar`}
-      onError={handleError}
+      width={24}
+      height={24}
       className={`rounded-full object-cover ${sizeClasses[size]} ${className}`}
+      onError={handleError}
+      quality={75}
     />
   );
 };
