@@ -1,10 +1,11 @@
-import { UserField, User } from "@/types/authTypes";
-import { createClient } from "./server";
+import { UserField } from "@/types/authTypes";
+import { User } from "@/types/authTypes";
+import { createClient as createClientClient } from "./client";
 
-export async function getCurrentUser<T extends UserField[]>(
+export async function getCurrentUserClient<T extends UserField[]>(
   fields: [...T]
 ): Promise<Pick<User, T[number]> | null> {
-  const supabase = await createClient();
+  const supabase = createClientClient();
 
   try {
     const {

@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AvatarProps {
   username: string;
   image?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
+  timestamp: string;
 }
 
 const Avatar = ({
@@ -15,8 +16,13 @@ const Avatar = ({
   image,
   size = "md",
   className = "",
+  timestamp,
 }: AvatarProps) => {
   const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [image, timestamp]);
 
   const sizeClasses = {
     sm: "w-6 h-6",
@@ -24,17 +30,23 @@ const Avatar = ({
     lg: "w-12 h-12",
   };
 
+  const handleError = () => {
+    setImgError(true);
+  };
   const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     username
   )}`;
 
-  const handleError = () => {
-    setImgError(true);
-  };
+  const imageUrl =
+    imgError || !image
+      ? defaultImage
+      : image.startsWith("data:image")
+      ? image
+      : `${image}?timestamp=${timestamp}`;
 
   return (
     <Image
-      src={imgError || !image ? defaultImage : image}
+      src={imageUrl}
       alt={`${username}'s avatar`}
       width={24}
       height={24}

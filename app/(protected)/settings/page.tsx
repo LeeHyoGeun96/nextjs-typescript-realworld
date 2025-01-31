@@ -1,3 +1,5 @@
+"use client";
+
 // import { useMutation, useQueryClient } from "@tanstack/react-query";
 // import { useNavigate } from "react-router-dom";
 // import { authService } from "../services/auth.service";
@@ -9,6 +11,11 @@
 // import { useUserStore } from "../store/userStore";
 
 import { logout } from "@/actions/auth";
+import { Button } from "@/components/ui/Button/Button";
+import { useAvatar } from "@/context/avatar/AvatarContext";
+import readFileAsDataURL from "@/util/readFileAsDataURL";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
 
 // const SettingsPage = () => {
 //   const user = useUserStore.getState().user;
@@ -198,10 +205,47 @@ import { logout } from "@/actions/auth";
 // export default SettingsPage;
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { setImageData } = useAvatar();
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const base64 = await readFileAsDataURL(file);
+      setImageData(base64);
+      router.push("/settings/avatar");
+    }
+    event.target.value = "";
+  };
+
   return (
     <>
       <h1>SettingsPage</h1>
       <button onClick={logout}>logout</button>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold mb-6">Settings</h1>
+        <div className="flex items-center gap-4">
+          {/* <Avatar /> */}
+          <input
+            type="file"
+            accept="image/*"
+            className="w-full"
+            onChange={handleFileChange}
+            ref={fileInputRef}
+            hidden
+          />
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            variant="primary"
+            size="lg"
+          >
+            Change Avatar
+          </Button>
+        </div>
+      </div>
     </>
   );
 }

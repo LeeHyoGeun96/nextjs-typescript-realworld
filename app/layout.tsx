@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/Header";
+import Header from "@/components/ui/Header/Header";
 import { Roboto } from "next/font/google";
+import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
+import { SWRConfig } from "swr";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,16 +17,20 @@ const roboto = Roboto({
   variable: "--font-roboto",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUserServer(["image", "username"]);
+
   return (
     <html lang="kr" className={roboto.variable}>
       <body>
-        <Header />
-        {children}
+        <SWRConfig value={{ fallback: { "/api/user": user } }}>
+          <Header />
+          {children}
+        </SWRConfig>
       </body>
     </html>
   );

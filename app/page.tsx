@@ -1,3 +1,5 @@
+"use client";
+
 // import PagenatedAticles from "../components/PagenatedAticles";
 
 // const HomePage = () => {
@@ -21,10 +23,6 @@
 
 // export default HomePage;
 
-export default async function HomePage() {
-  return (
-    <>
-      <div>HomePage</div>
-    </>
-  );
+export default function HomePage() {
+  return <div></div>;
 }
