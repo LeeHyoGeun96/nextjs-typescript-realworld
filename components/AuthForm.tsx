@@ -11,6 +11,7 @@ import GoogleLoginBtn from "./GoogleLoginBtn";
 import { PasswordError } from "@/error/errors";
 import { login, signup } from "@/actions/auth";
 import { useRouter } from "next/navigation";
+import { mutate } from "swr";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -41,11 +42,15 @@ const AuthForm = ({ type }: AuthFormProps) => {
 
   useEffect(() => {
     if (state?.success) {
-      if (type === "login") {
-        router.push("/");
-      } else {
-        router.push("/login");
-      }
+      const redirect = async () => {
+        if (type === "login") {
+          await mutate("/api/currentUser");
+          router.push("/");
+        } else {
+          router.push("/login");
+        }
+      };
+      redirect();
     }
   }, [state?.success, type, router]);
 
