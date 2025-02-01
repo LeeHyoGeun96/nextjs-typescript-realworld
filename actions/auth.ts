@@ -1,11 +1,10 @@
 "use server";
 
 import convertAuthSupabaseErrorToKorean from "@/error/convertAuthSupabaseErrorToKorean";
-import { SupabaseError, ValidationError } from "@/error/errors";
+import { ApiError, SupabaseError, ValidationError } from "@/error/errors";
 import { LoginState, SignupState } from "@/types/authTypes";
 import { validateSignup } from "@/util/validations";
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function login(_: LoginState, formData: FormData) {
@@ -20,11 +19,17 @@ export async function login(_: LoginState, formData: FormData) {
 
   if (error) {
     const formattedError = convertAuthSupabaseErrorToKorean(error.message);
-    return new SupabaseError(error.status!, formattedError);
+    return {
+      error: new SupabaseError(error.status!, formattedError),
+      value: data,
+    };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
 }
 
 export async function signup(_: SignupState, formData: FormData) {
@@ -43,27 +48,38 @@ export async function signup(_: SignupState, formData: FormData) {
 
   if (messages) {
     return {
-      errors: new ValidationError(messages),
-      values: data,
+      error: new ValidationError(messages),
+      value: data,
+      success: false,
     };
   }
 
-  const { error } = await supabase.auth.signUp(data);
+  const { error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: {
+        display_name: data.username,
+      },
+    },
+  });
 
   if (error) {
     const formattedErrors = convertAuthSupabaseErrorToKorean(
       error?.code ?? "unknown error"
     );
     return {
-      errors: new SupabaseError(error.status!, formattedErrors),
-      values: data,
+      error: new SupabaseError(error.status!, formattedErrors),
+      value: data,
+      success: false,
     };
   }
 
-  revalidatePath("/", "page");
-  revalidatePath("/profile", "layout");
-
-  redirect("/");
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
 }
 
 export async function signInWithGoogle() {
@@ -76,21 +92,12 @@ export async function signInWithGoogle() {
     },
   });
 
-  console.error(error);
+  if (error) {
+    console.error(error);
+    throw new ApiError(error.status!, error.message);
+  }
 
   if (data.url) {
     redirect(data.url); // use the redirect API for your server framework
   }
-}
-
-export async function logout() {
-  const supabase = await createClient();
-
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    throw error;
-  }
-
-  redirect("/");
 }

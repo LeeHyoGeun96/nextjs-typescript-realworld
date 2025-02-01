@@ -33,9 +33,7 @@ const Avatar = ({
   const handleError = () => {
     setImgError(true);
   };
-  const defaultImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    username
-  )}`;
+  const defaultImage = `https://ui-avatars.com/api/?name=${username}&format=png`;
 
   const imageUrl =
     imgError || !image

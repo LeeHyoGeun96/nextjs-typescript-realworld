@@ -5,7 +5,6 @@
 // import { authQueryOptions } from "../queryOptions/authQueryOptions";
 // import { useUserStore } from "../store/userStore";
 
-import { login } from "@/actions/auth";
 import AuthForm from "@/components/AuthForm";
 
 // export const action =
@@ -49,5 +48,5 @@ import AuthForm from "@/components/AuthForm";
 // export default LoginPage;
 
 export default function LoginPage() {
-  return <AuthForm type="login" onSubmit={login} />;
+  return <AuthForm type="login" />;
 }

@@ -2,34 +2,52 @@
 
 import Link from "next/link";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { LoginState, PasswordState, SignupState } from "@/types/authTypes";
 import { PasswordStrength } from "./PasswordStrength";
 import { ValidationInput } from "./ValidationInput";
 import { ErrorDisplay } from "./ErrorDisplay";
 import GoogleLoginBtn from "./GoogleLoginBtn";
 import { PasswordError } from "@/error/errors";
+import { login, signup } from "@/actions/auth";
+import { useRouter } from "next/navigation";
 
 interface AuthFormProps {
   type: "login" | "register";
-  onSubmit: (
-    prevState: LoginState | SignupState,
-    data: FormData
-  ) => Promise<LoginState | SignupState>;
 }
 
 const initialState: LoginState | SignupState = {
   error: undefined,
   value: {},
+  success: undefined,
 };
 
-const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
+const AuthForm = ({ type }: AuthFormProps) => {
+  const router = useRouter();
+  const actionHandler = async (
+    prevState: LoginState | SignupState,
+    formData: FormData
+  ): Promise<LoginState | SignupState> => {
+    if (type === "login") {
+      return await login(prevState as LoginState, formData);
+    } else {
+      return await signup(prevState as SignupState, formData);
+    }
+  };
   const [state, formAction, isPending] = useActionState(
-    async (state: LoginState | SignupState, formData: FormData) => {
-      return onSubmit(state || initialState, formData);
-    },
+    actionHandler,
     initialState
   );
+
+  useEffect(() => {
+    if (state?.success) {
+      if (type === "login") {
+        router.push("/");
+      } else {
+        router.push("/login");
+      }
+    }
+  }, [state?.success, type, router]);
 
   const [passwordState, setPasswordState] = useState<PasswordState>({
     error: undefined,

@@ -5,11 +5,13 @@ export type ValidationMessages = Record<string, string>;
 export interface SignupState {
   error?: SupabaseError | ValidationError;
   value: Record<string, string>;
+  success?: boolean;
 }
 
 export interface LoginState {
   error?: SupabaseError;
   value: Record<string, string>;
+  success?: boolean;
 }
 
 export interface PasswordState {

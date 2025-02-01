@@ -5,7 +5,6 @@
 // import { authQueryOptions } from "../queryOptions/authQueryOptions";
 // import { SignupFormDataType } from "../types/authTypes";
 
-import { signup } from "@/actions/auth";
 import AuthForm from "@/components/AuthForm";
 
 // export const action =
@@ -47,5 +46,5 @@ import AuthForm from "@/components/AuthForm";
 // export default RegisterPage;
 
 export default function RegisterPage() {
-  return <AuthForm type="register" onSubmit={signup} />;
+  return <AuthForm type="register" />;
 }
