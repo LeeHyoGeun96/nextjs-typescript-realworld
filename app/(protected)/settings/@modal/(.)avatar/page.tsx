@@ -5,7 +5,7 @@ import Crop from "@/components/crop/Crop";
 import { Button } from "@/components/ui/Button/Button";
 import Modal from "@/components/ui/Modal";
 import { useAvatar } from "@/context/avatar/AvatarContext";
-import { User } from "@/types/authTypes";
+import { CurrentUserType } from "@/types/authTypes";
 import { useRouter } from "next/navigation";
 import useSWR, { mutate } from "swr";
 
@@ -22,7 +22,7 @@ export default function AvatarModalPage() {
   const router = useRouter();
   const { imageData, setCroppedImage, croppedImage } = useAvatar();
 
-  const { data: previousData } = useSWR("/api/user");
+  const { data: previousData } = useSWR("/api/currentUser");
 
   const handleSave = async () => {
     try {
@@ -30,8 +30,10 @@ export default function AvatarModalPage() {
         const base64Image = await fileToBase64(croppedImage);
 
         await mutate(
-          "/api/user",
-          async (currentData: Pick<User, "image" | "username"> | undefined) => {
+          "/api/currentUser",
+          async (
+            currentData: Pick<CurrentUserType, "image" | "username"> | undefined
+          ) => {
             try {
               const publicUrl = await updateAvatar(croppedImage);
               if (!currentData?.username) {

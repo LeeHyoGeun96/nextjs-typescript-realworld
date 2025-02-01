@@ -9,11 +9,11 @@ import {
   SettingsIcon,
 } from "./icons";
 import Avatar from "@/components/Avatar";
-import { User } from "@/types/authTypes";
+import { CurrentUserType } from "@/types/authTypes";
 import { useEffect, useState } from "react";
 
 interface NavLinksProps {
-  user: Pick<User, "image" | "username"> | null;
+  user: Pick<CurrentUserType, "image" | "username"> | null;
   isMobile?: boolean;
 }
 

@@ -1,10 +1,10 @@
 import { UserField } from "@/types/authTypes";
-import { User } from "@/types/authTypes";
+import { CurrentUserType } from "@/types/authTypes";
 import { createClient as createClientClient } from "./client";
 
 export async function getCurrentUserClient<T extends UserField[]>(
-  fields: [...T]
-): Promise<Pick<User, T[number]> | null> {
+  fields: T = ["id", "email", "username", "image", "bio", "created_at"] as T
+): Promise<Pick<CurrentUserType, T[number]> | null> {
   const supabase = createClientClient();
 
   try {
@@ -27,7 +27,7 @@ export async function getCurrentUserClient<T extends UserField[]>(
     if (!data) return null;
 
     // 타입 캐스팅을 한번만 수행
-    return data as unknown as Pick<User, T[number]>;
+    return data as unknown as Pick<CurrentUserType, T[number]>;
   } catch (error) {
     console.error("Auth error:", error);
     return null;

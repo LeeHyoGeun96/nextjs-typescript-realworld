@@ -6,7 +6,7 @@ import useSWR from "swr";
 import { getCurrentUserClient } from "@/utils/supabase/getCurrentUserClient";
 
 export default function HeaderClient() {
-  const { data: user } = useSWR("/api/user", () =>
+  const { data: user } = useSWR("/api/currentUser", () =>
     getCurrentUserClient(["image", "username"])
   );
 

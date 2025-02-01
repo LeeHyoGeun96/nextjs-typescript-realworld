@@ -22,26 +22,16 @@ export interface PasswordState {
   };
 }
 
-export interface User {
+export interface CurrentUserType {
   id: string;
   email: string;
   username: string;
-  image: string | null;
+  image?: string;
   created_at: string;
   bio?: string;
 }
 
-export type UserField = keyof User;
-
-export interface CurrentUserType {
-  user: {
-    email: string;
-    token: string;
-    username: string;
-    bio: string;
-    image?: string;
-  };
-}
+export type UserField = keyof CurrentUserType;
 
 export interface LoginRequestParams {
   user: {

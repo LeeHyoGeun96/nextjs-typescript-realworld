@@ -22,12 +22,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getCurrentUserServer(["image", "username"]);
+  const currentUser = await getCurrentUserServer();
 
   return (
     <html lang="kr" className={roboto.variable}>
       <body>
-        <SWRConfig value={{ fallback: { "/api/user": user } }}>
+        <SWRConfig value={{ fallback: { "/api/currentUser": currentUser } }}>
           <Header />
           {children}
         </SWRConfig>

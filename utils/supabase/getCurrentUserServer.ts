@@ -1,11 +1,11 @@
 "use server";
 
-import { UserField, User } from "@/types/authTypes";
+import { UserField, CurrentUserType } from "@/types/authTypes";
 import { createClient as createClientServer } from "./server";
 
 export default async function getCurrentUserServer<T extends UserField[]>(
-  fields: [...T]
-): Promise<Pick<User, T[number]> | null> {
+  fields: T = ["id", "email", "username", "image", "bio", "created_at"] as T
+): Promise<Pick<CurrentUserType, T[number]> | null> {
   const supabase = await createClientServer();
 
   try {
@@ -28,7 +28,7 @@ export default async function getCurrentUserServer<T extends UserField[]>(
     if (!data) return null;
 
     // 타입 캐스팅을 한번만 수행
-    return data as unknown as Pick<User, T[number]>;
+    return data as unknown as Pick<CurrentUserType, T[number]>;
   } catch (error) {
     console.error("Auth error:", error);
     return null;
