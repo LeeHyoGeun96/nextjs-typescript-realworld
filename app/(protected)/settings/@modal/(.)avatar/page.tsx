@@ -7,7 +7,7 @@ import Modal from "@/components/ui/Modal";
 import { useAvatar } from "@/context/avatar/AvatarContext";
 import { User } from "@/types/authTypes";
 import { useRouter } from "next/navigation";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -22,11 +22,11 @@ export default function AvatarModalPage() {
   const router = useRouter();
   const { imageData, setCroppedImage, croppedImage } = useAvatar();
 
+  const { data: previousData } = useSWR("/api/user");
+
   const handleSave = async () => {
     try {
       if (croppedImage) {
-        const previousData = await mutate("/api/user");
-
         const base64Image = await fileToBase64(croppedImage);
 
         await mutate(
