@@ -1,7 +1,23 @@
-export interface AuthState {
-  isValid: boolean;
-  errors: Record<string, string>;
-  values: Record<string, string>;
+import { PasswordError, SupabaseError, ValidationError } from "@/error/errors";
+
+export type ValidationMessages = Record<string, string>;
+
+export interface SignupState {
+  error?: SupabaseError | ValidationError;
+  value: Record<string, string>;
+}
+
+export interface LoginState {
+  error?: SupabaseError;
+  value: Record<string, string>;
+}
+
+export interface PasswordState {
+  error?: PasswordError;
+  values: {
+    password: string;
+    passwordConfirm: string;
+  };
 }
 
 export interface User {

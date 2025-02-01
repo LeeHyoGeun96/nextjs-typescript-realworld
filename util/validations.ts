@@ -4,17 +4,17 @@ export const validateSignup = (data: Record<string, unknown>) => {
   const result = SignupSchema.safeParse(data);
 
   if (result.success) {
-    return { isValid: true, errors: {} };
+    return undefined;
   }
 
-  // 에러를 필드별로 정리
-  const errors: Record<string, string> = {};
+  // 검증 메시지를 필드별로 정리
+  const validationMessages: Record<string, string> = {};
   result.error.errors.forEach((err) => {
     const field = err.path[0] as string;
-    if (!errors[field]) {
-      errors[field] = err.message;
+    if (!validationMessages[field]) {
+      validationMessages[field] = err.message;
     }
   });
 
-  return { isValid: false, errors };
+  return { ...validationMessages };
 };

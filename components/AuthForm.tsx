@@ -3,43 +3,36 @@
 import Link from "next/link";
 
 import { useActionState, useState } from "react";
-import { AuthState } from "@/types/authTypes";
+import { LoginState, PasswordState, SignupState } from "@/types/authTypes";
 import { PasswordStrength } from "./PasswordStrength";
 import { ValidationInput } from "./ValidationInput";
 import { ErrorDisplay } from "./ErrorDisplay";
 import GoogleLoginBtn from "./GoogleLoginBtn";
+import { PasswordError } from "@/error/errors";
 
 interface AuthFormProps {
   type: "login" | "register";
-  onSubmit: (prevState: AuthState, data: FormData) => Promise<AuthState | void>;
+  onSubmit: (
+    prevState: LoginState | SignupState,
+    data: FormData
+  ) => Promise<LoginState | SignupState>;
 }
 
-interface PasswordState {
-  isValid: boolean;
-  errors: Record<string, string>;
-  values: {
-    password: string;
-    passwordConfirm: string;
-  };
-}
-
-const initialState: AuthState = {
-  isValid: true,
-  errors: {},
-  values: {},
+const initialState: LoginState | SignupState = {
+  error: undefined,
+  value: {},
 };
 
 const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
   const [state, formAction, isPending] = useActionState(
-    async (state: void | AuthState, formData: FormData) => {
+    async (state: LoginState | SignupState, formData: FormData) => {
       return onSubmit(state || initialState, formData);
     },
     initialState
   );
 
   const [passwordState, setPasswordState] = useState<PasswordState>({
-    isValid: true,
-    errors: {},
+    error: undefined,
     values: {
       password: "",
       passwordConfirm: "",
@@ -63,17 +56,10 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
       ) {
         return {
           ...newState,
-          isValid:
+          error:
             newState.values.password !== newState.values.passwordConfirm
-              ? false
-              : true,
-          errors: {
-            ...newState.errors,
-            passwordConfirm:
-              newState.values.password !== newState.values.passwordConfirm
-                ? "비밀번호가 일치하지 않습니다"
-                : "",
-          },
+              ? new PasswordError("비밀번호가 일치하지 않습니다")
+              : undefined,
         };
       }
 
@@ -100,37 +86,37 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
           </header>
 
           <form className="space-y-6" action={formAction}>
-            <ErrorDisplay authState={state} field="server" />
+            <ErrorDisplay message={state.error?.message} />
             {!isLoginForm && (
               <fieldset className="mb-4">
                 <ValidationInput
-                  errors={state}
+                  state={state}
                   props={{
                     type: "text",
                     name: "username",
                     placeholder: "Username",
                     required: true,
-                    defaultValue: state?.values?.username || "",
+                    defaultValue: state?.value?.username || "",
                   }}
                 />
               </fieldset>
             )}
             <fieldset className="mb-4">
               <ValidationInput
-                errors={state}
+                state={state}
                 props={{
                   type: "email",
                   name: "email",
                   placeholder: "Email",
                   autoComplete: "email",
                   required: true,
-                  defaultValue: state?.values?.email || "",
+                  defaultValue: state?.value?.email || "",
                 }}
               />
             </fieldset>
             <fieldset className="mb-4">
               <ValidationInput
-                errors={state}
+                state={passwordState}
                 props={{
                   type: "password",
                   name: "password",
@@ -148,7 +134,7 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
             {!isLoginForm && (
               <fieldset className="mb-4">
                 <ValidationInput
-                  errors={passwordState}
+                  state={passwordState}
                   props={{
                     type: "password",
                     name: "passwordConfirm",
@@ -172,7 +158,7 @@ const AuthForm = ({ type, onSubmit }: AuthFormProps) => {
                   disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed
                   "
               type="submit"
-              disabled={isPending || !passwordState.isValid}
+              disabled={isPending || !!passwordState.error}
             >
               {title}
             </button>

@@ -9,11 +9,10 @@
 // import LoadingIndicator from "../components/LoadingIndicator";
 // import { Input } from "../components/Input";
 // import { useUserStore } from "../store/userStore";
-
-import { logout } from "@/actions/auth";
 import { Button } from "@/components/ui/Button/Button";
 import { useAvatar } from "@/context/avatar/AvatarContext";
 import readFileAsDataURL from "@/util/readFileAsDataURL";
+import logout from "@/utils/auth/logout";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 

@@ -1,32 +1,35 @@
-import { AuthState } from "@/types/authTypes";
 import { Input } from "./Input";
 import { InputHTMLAttributes } from "react";
 import { ErrorDisplay } from "./ErrorDisplay";
+import { LoginState, PasswordState, SignupState } from "@/types/authTypes";
+import { SupabaseError, ValidationError } from "@/error/errors";
 
 interface ValidationInputProps {
-  errors: AuthState | void;
+  state: SignupState | LoginState | PasswordState;
   props: InputHTMLAttributes<HTMLInputElement>;
 }
 
-export const ValidationInput = ({ errors, props }: ValidationInputProps) => {
-  if (!errors) {
-    return null;
-  }
-
+export const ValidationInput = ({ state, props }: ValidationInputProps) => {
   const fieldName = props.name || "";
-  const hasError = Boolean(errors?.errors[fieldName]);
+  let errorMessage = "";
+
+  if (state.error instanceof ValidationError) {
+    errorMessage = state.error.fieldErrors[fieldName];
+  } else if (state.error instanceof SupabaseError) {
+    errorMessage = state.error.message;
+  }
 
   return (
     <section>
       <Input
         {...props}
         className={`${props.className || ""} ${
-          hasError
+          errorMessage
             ? "border-red-500 ring-2 ring-red-500 focus:border-red-500 focus:ring-red-500"
             : ""
         }`}
       />
-      <ErrorDisplay authState={errors} field={fieldName} />
+      <ErrorDisplay message={errorMessage} />
     </section>
   );
 };
