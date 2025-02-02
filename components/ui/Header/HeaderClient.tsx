@@ -4,9 +4,10 @@ import Link from "next/link";
 import { NavLinks } from "./NavLinks";
 import useSWR from "swr";
 import { getCurrentUserClient } from "@/utils/supabase/getCurrentUserClient";
+import { API_ENDPOINTS } from "@/constant/api";
 
 export default function HeaderClient() {
-  const { data: user } = useSWR("/api/currentUser", () =>
+  const { data: user } = useSWR(API_ENDPOINTS.CURRENT_USER, () =>
     getCurrentUserClient(["image", "username"])
   );
 
