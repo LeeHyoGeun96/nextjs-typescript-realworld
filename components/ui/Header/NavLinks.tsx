@@ -8,9 +8,8 @@ import {
   RegisterIcon,
   SettingsIcon,
 } from "./icons";
-import Avatar from "@/components/Avatar";
 import { CurrentUserType } from "@/types/authTypes";
-import { useEffect, useState } from "react";
+import { TimestampAvatar } from "../Avata/TimestampAvatar";
 
 interface NavLinksProps {
   user: Pick<CurrentUserType, "image" | "username"> | null;
@@ -18,15 +17,7 @@ interface NavLinksProps {
 }
 
 export const NavLinks = ({ isMobile, user }: NavLinksProps) => {
-  const [timestamp, setTimestamp] = useState("");
   const isLoggedIn = !!user;
-
-  useEffect(() => {
-    // 클라이언트 사이드에서만 timestamp 생성
-    if (user?.image) {
-      setTimestamp(Date.now().toString());
-    }
-  }, [user?.image]);
 
   return (
     <>
@@ -57,12 +48,10 @@ export const NavLinks = ({ isMobile, user }: NavLinksProps) => {
               isMobile={isMobile}
               classes="md:flex md:gap-1 md:translate-y-[1px]"
             >
-              <Avatar
-                username={user?.username || ""}
-                image={user?.image}
+              <TimestampAvatar
+                user={user}
                 size={isMobile ? "sm" : "md"}
                 className={isMobile ? "" : "mr-1"}
-                timestamp={timestamp}
               />
               <span className="translate-y-[1px] lg:translate-y-[2px]">
                 {user?.username}

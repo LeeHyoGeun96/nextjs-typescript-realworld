@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArticleType } from "../types/articleTypes";
-import Avatar from "./Avatar";
+import Avatar from "./ui/Avata/Avatar";
 
 interface ArticleListProps {
   articles: ArticleType[];
