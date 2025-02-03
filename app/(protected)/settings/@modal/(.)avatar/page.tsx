@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from "@/constant/api";
 import { useAvatar } from "@/context/avatar/AvatarContext";
 import { CurrentUserType } from "@/types/authTypes";
 import { useRouter } from "next/navigation";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -23,8 +23,6 @@ export default function AvatarModalPage() {
   const router = useRouter();
   const { imageData, setCroppedImage, croppedImage } = useAvatar();
 
-  const { data: previousData } = useSWR(API_ENDPOINTS.CURRENT_USER);
-
   const handleSave = async () => {
     try {
       if (croppedImage) {
@@ -32,18 +30,15 @@ export default function AvatarModalPage() {
 
         await mutate(
           API_ENDPOINTS.CURRENT_USER,
-          async (
-            currentData: Pick<CurrentUserType, "image" | "username"> | undefined
-          ) => {
+          async (currentData: CurrentUserType | undefined) => {
             try {
               const publicUrl = await updateAvatar(croppedImage);
               if (!currentData?.username) {
-                throw new Error("Username is required");
+                throw new Error("사용자 정보가 없습니다.");
               }
               return { ...currentData, image: publicUrl };
             } catch (error) {
-              console.error("Error updating avatar:", error);
-              return previousData;
+              throw error;
             }
           },
           {
@@ -51,9 +46,12 @@ export default function AvatarModalPage() {
               ...currentData,
               image: base64Image,
             }),
-            revalidate: true,
+            rollbackOnError: true,
+            revalidate: false,
           }
         );
+      } else {
+        throw new Error("이미지가 선택되지 않았습니다");
       }
 
       router.back();
