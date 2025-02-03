@@ -18,9 +18,7 @@ export function TimestampAvatar({
   const [timestamp, setTimestamp] = useState<string>("");
 
   useEffect(() => {
-    if (user?.image) {
-      setTimestamp(Date.now().toString());
-    }
+    setTimestamp(Date.now().toString());
   }, [user?.image]);
 
   return (
