@@ -15,7 +15,7 @@ export function TimestampAvatar({
   size = "md",
   className = "",
 }: TimestampAvatarProps) {
-  const [timestamp, setTimestamp] = useState<string>("");
+  const [timestamp, setTimestamp] = useState("");
 
   useEffect(() => {
     setTimestamp(Date.now().toString());

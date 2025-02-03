@@ -12,15 +12,17 @@ export class ApiError extends Error {
 }
 
 export class SupabaseAuthError extends Error {
-  constructor(public status: number, message: string) {
-    super(convertAuthSupabaseErrorToKorean(message));
+  constructor(public code: string, message: string) {
+    super(message);
+    this.code = convertAuthSupabaseErrorToKorean(code);
     this.name = "SupabaseAuthError";
   }
 }
 
 export class SupabaseStorageError extends Error {
   constructor(public code: string, message: string) {
-    super(convertStorageSupabaseErrorToKorean(message));
+    super(message);
+    this.code = convertStorageSupabaseErrorToKorean(code);
     this.name = "SupabaseStorageError";
   }
 }

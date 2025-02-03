@@ -1,6 +1,6 @@
 import { UserField, CurrentUserType } from "@/types/authTypes";
 import { createClient as createClientClient } from "./client";
-import { SupabaseAuthError, SupabaseStorageError } from "@/error/errors";
+import { SupabaseAuthError } from "@/error/errors";
 
 const defaultFields = [
   "id",
@@ -23,11 +23,12 @@ export async function getCurrentUserClient<
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    throw new SupabaseAuthError(
-      error?.status || 500,
-      error?.code || "세션 조회 중 알 수 없는 에러"
-    );
+  if (error) {
+    throw new SupabaseAuthError(error.code || "unknown error", error.message);
+  }
+
+  if (!user) {
+    throw new Error("User not found");
   }
 
   const { data, error: selectError } = await supabase
@@ -37,7 +38,10 @@ export async function getCurrentUserClient<
     .single();
 
   if (selectError) {
-    throw new SupabaseStorageError(selectError.code, selectError.message);
+    throw new SupabaseAuthError(
+      selectError.code || "unknown error",
+      selectError.message
+    );
   }
 
   return data as unknown as Pick<CurrentUserType, T[number]>;

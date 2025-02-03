@@ -3,8 +3,8 @@ import "./globals.css";
 import Header from "@/components/ui/Header/Header";
 import { Roboto } from "next/font/google";
 import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
-import { SWRConfig } from "swr";
 import { API_ENDPOINTS } from "@/constant/api";
+import { SWRProvider } from "@/lib/swr/SWRProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -28,14 +28,10 @@ export default async function RootLayout({
   return (
     <html lang="kr" className={roboto.variable}>
       <body>
-        <SWRConfig
-          value={{
-            fallback: { [API_ENDPOINTS.CURRENT_USER]: currentUser },
-          }}
-        >
+        <SWRProvider fallback={{ [API_ENDPOINTS.CURRENT_USER]: currentUser }}>
           <Header />
           {children}
-        </SWRConfig>
+        </SWRProvider>
       </body>
     </html>
   );

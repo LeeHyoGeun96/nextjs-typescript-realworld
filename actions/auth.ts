@@ -19,8 +19,8 @@ export async function login(_: LoginState, formData: FormData) {
   if (error) {
     return {
       error: new SupabaseAuthError(
-        error.status || 500,
-        error.code || "unknown error"
+        error.code || "unknown error",
+        error.message
       ),
       value: data,
     };
@@ -68,8 +68,8 @@ export async function signup(_: SignupState, formData: FormData) {
   if (error) {
     return {
       error: new SupabaseAuthError(
-        error.status || 500,
-        error.code || "unknown error"
+        error.code || "unknown error",
+        error.message
       ),
       value: data,
       success: false,

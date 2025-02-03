@@ -9,7 +9,7 @@
 // import { useUserStore } from "../store/userStore";
 
 import ChangeAvata from "@/components/settting/ChangeAvata";
-import logout from "@/utils/auth/logout";
+import SettingForm from "@/components/settting/ProfileForm";
 
 // const SettingsPage = () => {
 //   const user = useUserStore.getState().user;
@@ -201,9 +201,12 @@ import logout from "@/utils/auth/logout";
 export default function SettingsPage() {
   return (
     <>
-      <h1>SettingsPage</h1>
+      <h1 className="text-5xl text-center text-gray-800 dark:text-gray-100 mb-8">
+        사용자 정보 수정
+      </h1>
       {/* <button onClick={logout}>logout</button> */}
       <ChangeAvata />
+      <SettingForm />
     </>
   );
 }

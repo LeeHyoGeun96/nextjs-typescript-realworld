@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 
-import { useActionState, useEffect, useState } from "react";
-import { LoginState, PasswordState, SignupState } from "@/types/authTypes";
-import { PasswordStrength } from "./PasswordStrength";
+import { useActionState, useEffect } from "react";
+import { LoginState, SignupState } from "@/types/authTypes";
 import { ValidationInput } from "./ValidationInput";
 import { ErrorDisplay } from "./ErrorDisplay";
 import GoogleLoginBtn from "./GoogleLoginBtn";
-import { PasswordError } from "@/error/errors";
 import { login, signup } from "@/actions/auth";
 import { useRouter } from "next/navigation";
 import { mutate } from "swr";
+import { PasswordFields } from "./PasswordFields";
+import { Button } from "./ui/Button/Button";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -54,41 +54,10 @@ const AuthForm = ({ type }: AuthFormProps) => {
     }
   }, [state?.success, type, router]);
 
-  const [passwordState, setPasswordState] = useState<PasswordState>({
-    error: undefined,
-    values: {
-      password: "",
-      passwordConfirm: "",
-    },
-  });
   const isLoginForm = type === "login";
   const title = isLoginForm ? "Sign in" : "Sign up";
   const switchText = isLoginForm ? "Need an account?" : "Have an account?";
   const switchLink = isLoginForm ? "/register" : "/login";
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    setPasswordState((prev) => {
-      const newState = { ...prev, values: { ...prev.values, [name]: value } };
-
-      // 비밀번호 확인이 있을 때만 검증
-      if (
-        (name === "password" && prev.values.passwordConfirm) ||
-        (name === "passwordConfirm" && prev.values.password)
-      ) {
-        return {
-          ...newState,
-          error:
-            newState.values.password !== newState.values.passwordConfirm
-              ? new PasswordError("비밀번호가 일치하지 않습니다")
-              : undefined,
-        };
-      }
-
-      return newState;
-    });
-  };
 
   return (
     <div className="container mx-auto px-4 pt-4 ">
@@ -137,54 +106,16 @@ const AuthForm = ({ type }: AuthFormProps) => {
                 }}
               />
             </fieldset>
-            <fieldset className="mb-4">
-              <ValidationInput
-                state={passwordState}
-                props={{
-                  type: "password",
-                  name: "password",
-                  placeholder: "Password",
-                  autoComplete: "current-password",
-                  required: true,
-                  onChange: handlePasswordChange,
-                  value: passwordState.values.password,
-                }}
-              />
-              {!isLoginForm && (
-                <PasswordStrength password={passwordState.values.password} />
-              )}
-            </fieldset>
-            {!isLoginForm && (
-              <fieldset className="mb-4">
-                <ValidationInput
-                  state={passwordState}
-                  props={{
-                    type: "password",
-                    name: "passwordConfirm",
-                    placeholder: "Password Confirm",
-                    required: true,
-                    onChange: handlePasswordChange,
-                    value: passwordState.values.passwordConfirm,
-                  }}
-                />
-              </fieldset>
-            )}
-            <button
-              className="w-full py-2 px-4 text-lg 
-                  text-white
-                  bg-green-600 hover:bg-green-700 
-                  dark:bg-green-500 dark:hover:bg-green-600
-                  rounded-md 
-                  transition-colors duration-200
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 
-                  focus:ring-green-500 dark:focus:ring-green-400
-                  disabled:bg-gray-400 disabled:text-gray-600 disabled:cursor-not-allowed
-                  "
+            <PasswordFields isLoginForm={isLoginForm} />
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full"
               type="submit"
-              disabled={isPending || !!passwordState.error}
+              disabled={isPending}
             >
               {title}
-            </button>
+            </Button>
           </form>
 
           <section className="mt-8">

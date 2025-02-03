@@ -25,11 +25,12 @@ export default async function getCurrentUserServer<
     error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    throw new SupabaseAuthError(
-      error?.status || 500,
-      error?.code || "세션 조회 중 알 수 없는 에러"
-    );
+  if (error) {
+    throw new SupabaseAuthError(error.code || "unknown error", error.message);
+  }
+
+  if (!user) {
+    throw new Error("User not found");
   }
 
   const { data, error: selectError } = await supabase

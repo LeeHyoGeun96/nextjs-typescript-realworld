@@ -1,5 +1,5 @@
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger";
+  variant?: "primary" | "secondary" | "danger" | "outline-danger";
   size?: "sm" | "md" | "lg";
 }
 
@@ -13,6 +13,9 @@ const variants = {
     "bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600",
   danger:
     "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600",
+  // 새로운 variant 추가
+  "outline-danger":
+    "border border-red-500 text-red-500 hover:bg-red-50 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-900/20 focus:ring-red-500 dark:focus:ring-red-400",
 };
 
 const sizes = {

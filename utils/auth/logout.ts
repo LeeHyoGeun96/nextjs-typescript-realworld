@@ -10,7 +10,7 @@ export default async function logout() {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    throw new SupabaseAuthError(error.status!, error.code || "unknown error");
+    throw new SupabaseAuthError(error.code || "unknown error", error.message);
   }
 
   await mutate("/api/user", null, false);
