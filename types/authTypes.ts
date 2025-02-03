@@ -1,15 +1,19 @@
-import { PasswordError, SupabaseError, ValidationError } from "@/error/errors";
+import {
+  PasswordError,
+  SupabaseAuthError,
+  ValidationError,
+} from "@/error/errors";
 
 export type ValidationMessages = Record<string, string>;
 
 export interface SignupState {
-  error?: SupabaseError | ValidationError;
+  error?: SupabaseAuthError | ValidationError;
   value: Record<string, string>;
   success?: boolean;
 }
 
 export interface LoginState {
-  error?: SupabaseError;
+  error?: SupabaseAuthError;
   value: Record<string, string>;
   success?: boolean;
 }

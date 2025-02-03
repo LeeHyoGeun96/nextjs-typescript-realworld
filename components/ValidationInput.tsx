@@ -2,7 +2,7 @@ import { Input } from "./Input";
 import { InputHTMLAttributes } from "react";
 import { ErrorDisplay } from "./ErrorDisplay";
 import { LoginState, PasswordState, SignupState } from "@/types/authTypes";
-import { SupabaseError, ValidationError } from "@/error/errors";
+import { SupabaseAuthError, ValidationError } from "@/error/errors";
 
 interface ValidationInputProps {
   state: SignupState | LoginState | PasswordState;
@@ -15,7 +15,7 @@ export const ValidationInput = ({ state, props }: ValidationInputProps) => {
 
   if (state.error instanceof ValidationError) {
     errorMessage = state.error.fieldErrors[fieldName];
-  } else if (state.error instanceof SupabaseError) {
+  } else if (state.error instanceof SupabaseAuthError) {
     errorMessage = state.error.message;
   }
 

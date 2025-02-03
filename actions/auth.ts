@@ -1,7 +1,6 @@
 "use server";
 
-import convertAuthSupabaseErrorToKorean from "@/error/convertAuthSupabaseErrorToKorean";
-import { ApiError, SupabaseError, ValidationError } from "@/error/errors";
+import { ApiError, SupabaseAuthError, ValidationError } from "@/error/errors";
 import { LoginState, SignupState } from "@/types/authTypes";
 import { validateSignup } from "@/util/validations";
 import { createClient } from "@/utils/supabase/server";
@@ -18,9 +17,11 @@ export async function login(_: LoginState, formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    const formattedError = convertAuthSupabaseErrorToKorean(error.message);
     return {
-      error: new SupabaseError(error.status!, formattedError),
+      error: new SupabaseAuthError(
+        error.status || 500,
+        error.code || "unknown error"
+      ),
       value: data,
     };
   }
@@ -65,11 +66,11 @@ export async function signup(_: SignupState, formData: FormData) {
   });
 
   if (error) {
-    const formattedErrors = convertAuthSupabaseErrorToKorean(
-      error?.code ?? "unknown error"
-    );
     return {
-      error: new SupabaseError(error.status!, formattedErrors),
+      error: new SupabaseAuthError(
+        error.status || 500,
+        error.code || "unknown error"
+      ),
       value: data,
       success: false,
     };
