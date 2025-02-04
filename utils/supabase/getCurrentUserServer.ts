@@ -30,7 +30,7 @@ export default async function getCurrentUserServer<
   }
 
   if (!user) {
-    throw new Error("User not found");
+    return null;
   }
 
   const { data, error: selectError } = await supabase
