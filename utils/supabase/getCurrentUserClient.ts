@@ -19,6 +19,14 @@ export async function getCurrentUserClient<
   const supabase = createClientClient();
 
   const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return null;
+  }
+
+  const {
     data: { user },
     error,
   } = await supabase.auth.getUser();

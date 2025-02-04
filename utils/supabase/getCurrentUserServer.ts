@@ -19,6 +19,13 @@ export default async function getCurrentUserServer<
   fields: T = defaultFields as T
 ): Promise<Pick<CurrentUserType, T[number]> | null> {
   const supabase = await createClientServer();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return null;
+  }
 
   const {
     data: { user },
