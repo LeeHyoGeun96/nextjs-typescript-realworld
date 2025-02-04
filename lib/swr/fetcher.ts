@@ -2,7 +2,6 @@ import { API_ENDPOINTS } from "@/constant/api";
 import { getCurrentUserClient } from "@/utils/supabase/getCurrentUserClient";
 
 export const fetcher = async (url: string) => {
-  console.log("hi", url);
   try {
     switch (url) {
       case API_ENDPOINTS.CURRENT_USER:
