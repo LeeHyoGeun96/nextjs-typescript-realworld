@@ -8,15 +8,20 @@ import {
   RegisterIcon,
   SettingsIcon,
 } from "./icons";
-import { CurrentUserType } from "@/types/authTypes";
+
 import { TimestampAvatar } from "../Avata/TimestampAvatar";
+import useSWR from "swr";
+import { getCurrentUserClient } from "@/utils/supabase/getCurrentUserClient";
+import { API_ENDPOINTS } from "@/constant/api";
 
 interface NavLinksProps {
-  user: Pick<CurrentUserType, "image" | "username"> | null;
   isMobile?: boolean;
 }
 
-export const NavLinks = ({ isMobile, user }: NavLinksProps) => {
+export const NavLinks = ({ isMobile }: NavLinksProps) => {
+  const { data: user } = useSWR(API_ENDPOINTS.CURRENT_USER, () =>
+    getCurrentUserClient(["image", "username"])
+  );
   const isLoggedIn = !!user;
 
   return (
