@@ -1,6 +1,10 @@
 "use server";
 
-import { LoginState, SignupState } from "@/types/authTypes";
+import {
+  ChangeUserInfoState,
+  LoginState,
+  SignupState,
+} from "@/types/authTypes";
 import { validatePassword, validateSignup } from "@/utils/validations";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -171,6 +175,42 @@ export async function updatePassword(_: unknown, formData: FormData) {
         name: "AuthError",
         message: error.message,
         code: error.code,
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
+}
+
+export async function ChangeUserInfo(
+  _: ChangeUserInfoState,
+  formData: FormData
+) {
+  const supabase = await createClient();
+  const { id: userId } = await getCurrentUserServer(["id"]);
+
+  const data = {
+    username: formData.get("username") as string,
+    bio: formData.get("bio") as string,
+  };
+
+  const { error } = await supabase
+    .from("users")
+    .update({ username: data.username, bio: data.bio })
+    .eq("id", userId)
+    .select();
+
+  if (error) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "프로필 수정에 실패했습니다.",
       } as AuthError,
       value: data,
     };

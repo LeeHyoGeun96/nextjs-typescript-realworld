@@ -3,16 +3,46 @@
 import { Input } from "../Input";
 import useSWR from "swr";
 import { Button } from "../ui/Button/Button";
-// import { ErrorDisplay } from "../ErrorDisplay";
+import { useActionState } from "react";
+import { ChangeUserInfo } from "@/actions/auth";
+import { ErrorDisplay } from "../ErrorDisplay";
 
 export default function SettingForm() {
-  const { data: user } = useSWR("/api/currentUser");
+  const [state, formAction] = useActionState(ChangeUserInfo, {
+    success: false,
+    error: undefined,
+    value: {
+      username: "",
+      bio: "",
+    },
+  });
+
+  const { data: user, mutate } = useSWR("/api/currentUser");
+
+  const handleSubmit = async (formData: FormData) => {
+    const newUser = {
+      username: formData.get("username"),
+      bio: formData.get("bio"),
+    };
+
+    await mutate(
+      async () => {
+        formAction(formData);
+        return { ...user, ...newUser };
+      },
+      {
+        optimisticData: { ...user, ...newUser },
+        rollbackOnError: true,
+        revalidate: false,
+      }
+    );
+  };
 
   return (
     <>
-      {/* <ErrorDisplay errors={errors} /> */}
+      <ErrorDisplay message={state.error?.message} />
 
-      <form className="space-y-6">
+      <form className="space-y-6" action={handleSubmit}>
         <div className="space-y-4">
           <div className="form-group">
             <label htmlFor="username" className="sr-only">

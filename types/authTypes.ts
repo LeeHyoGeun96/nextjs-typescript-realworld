@@ -24,6 +24,15 @@ export interface PasswordState {
   };
 }
 
+export interface ChangeUserInfoState {
+  success?: boolean;
+  error?: ApiError;
+  value: {
+    username?: string;
+    bio?: string;
+  };
+}
+
 export type ApiResponse = SignupState | LoginState | PasswordState;
 
 export interface CurrentUserType {
