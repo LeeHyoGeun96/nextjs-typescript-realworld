@@ -2,7 +2,6 @@
 
 import { UserField, CurrentUserType } from "@/types/authTypes";
 import { createClient as createClientServer } from "./server";
-import { SupabaseAuthError, SupabaseStorageError } from "@/error/errors";
 
 const defaultFields = [
   "id",
@@ -15,16 +14,19 @@ const defaultFields = [
 
 export default async function getCurrentUserServer<
   T extends UserField[] = typeof defaultFields
->(
-  fields: T = defaultFields as T
-): Promise<Pick<CurrentUserType, T[number]> | null> {
+>(fields: T = defaultFields as T): Promise<Pick<CurrentUserType, T[number]>> {
   const supabase = await createClientServer();
   const {
     data: { session },
+    error: sessionError,
   } = await supabase.auth.getSession();
 
+  if (sessionError) {
+    throw sessionError;
+  }
+
   if (!session) {
-    return null;
+    throw new Error("세션이 없습니다.");
   }
 
   const {
@@ -33,11 +35,11 @@ export default async function getCurrentUserServer<
   } = await supabase.auth.getUser();
 
   if (error) {
-    throw new SupabaseAuthError(error.code || "unknown error", error.message);
+    throw error;
   }
 
   if (!user) {
-    return null;
+    throw new Error("유저가 없습니다.");
   }
 
   const { data, error: selectError } = await supabase
@@ -47,7 +49,7 @@ export default async function getCurrentUserServer<
     .single();
 
   if (selectError) {
-    throw new SupabaseStorageError(selectError.code, selectError.message);
+    throw selectError;
   }
 
   return data as unknown as Pick<CurrentUserType, T[number]>;

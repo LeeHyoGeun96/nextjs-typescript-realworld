@@ -1,6 +1,5 @@
 "use client";
 
-import logout from "@/utils/auth/logout";
 import { Input } from "../Input";
 import useSWR from "swr";
 import { Button } from "../ui/Button/Button";
@@ -42,38 +41,14 @@ export default function SettingForm() {
               className="min-h-[200px]"
             />
           </div>
-
-          <div className="form-group">
-            <label htmlFor="password" className="sr-only">
-              New Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="New Password"
-              name="password"
-              autoComplete="current-password"
-            />
-          </div>
         </div>
 
         <div className="flex justify-end">
           <Button type="submit" variant="primary" size="lg">
-            Update Settings
+            프로필 수정하기
           </Button>
         </div>
       </form>
-
-      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-        <Button
-          variant="outline-danger"
-          className="w-full"
-          size="lg"
-          onClick={logout}
-        >
-          Or click here to logout
-        </Button>
-      </div>
     </>
   );
 }

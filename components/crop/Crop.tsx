@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 import Cropper from "react-easy-crop";
 import "./styles.module.css";
-import getCroppedImg from "@/util/crop/getCroppedImg";
+import getCroppedImg from "@/utils/crop/getCroppedImg";
 
 type CropProps = {
   imageSrc: string;

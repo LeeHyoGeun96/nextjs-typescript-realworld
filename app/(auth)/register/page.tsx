@@ -1,5 +1,5 @@
-import AuthForm from "@/components/AuthForm";
+import SignupForm from "@/components/Auth/SignupForm";
 
 export default function RegisterPage() {
-  return <AuthForm type="register" />;
+  return <SignupForm />;
 }

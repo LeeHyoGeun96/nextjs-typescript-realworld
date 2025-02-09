@@ -13,7 +13,7 @@ export default function SettingsLayout({
         <main className=" dark:bg-gray-900 min-h-screen flex justify-center">
           <section className="bg-white dark:bg-gray-800 rounded-lg p-6 md:p-8 max-w-4xl w-full">
             {children}
-            <div className="w-full">{modal}</div>
+            <section className="w-full">{modal}</section>
           </section>
         </main>
       </AvatarProvider>

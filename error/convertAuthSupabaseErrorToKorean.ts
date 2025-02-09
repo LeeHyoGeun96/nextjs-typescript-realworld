@@ -1,5 +1,7 @@
-const convertAuthSupabaseErrorToKorean = (errorMsg: string) => {
-  switch (errorMsg) {
+const convertAuthSupabaseErrorToKorean = (code: string | undefined) => {
+  if (!code) return undefined;
+
+  switch (code) {
     case "Invalid login credentials":
       return "이메일 또는 비밀번호가 올바르지 않습니다";
 
@@ -48,7 +50,7 @@ const convertAuthSupabaseErrorToKorean = (errorMsg: string) => {
       return "요청 시간이 초과되었습니다. 다시 시도해주세요";
 
     default:
-      return `인증 과정에서 오류가 발생했습니다: ${errorMsg}`;
+      return undefined;
   }
 };
 

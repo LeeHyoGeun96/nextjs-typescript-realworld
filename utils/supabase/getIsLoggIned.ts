@@ -8,7 +8,6 @@ export default async function getIsLoggedIn(): Promise<boolean> {
       data: { session },
       error,
     } = await supabase.auth.getSession();
-    console.log(session);
 
     if (error || !session) {
       return false;

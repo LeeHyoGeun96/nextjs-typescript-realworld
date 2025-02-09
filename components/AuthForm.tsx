@@ -3,8 +3,8 @@
 import Link from "next/link";
 
 import { useActionState, useEffect } from "react";
-import { LoginState, SignupState } from "@/types/authTypes";
-import { ValidationInput } from "./ValidationInput";
+import { ApiResponse, LoginState, SignupState } from "@/types/authTypes";
+import { ValidationInput } from "./InputWithError";
 import { ErrorDisplay } from "./ErrorDisplay";
 import GoogleLoginBtn from "./GoogleLoginBtn";
 import { login, signup } from "@/actions/auth";
@@ -28,7 +28,7 @@ const AuthForm = ({ type }: AuthFormProps) => {
   const actionHandler = async (
     prevState: LoginState | SignupState,
     formData: FormData
-  ): Promise<LoginState | SignupState> => {
+  ): Promise<ApiResponse> => {
     if (type === "login") {
       return await login(prevState as LoginState, formData);
     } else {
@@ -106,7 +106,11 @@ const AuthForm = ({ type }: AuthFormProps) => {
                 }}
               />
             </fieldset>
-            <PasswordFields isLoginForm={isLoginForm} />
+            {type === "register" ? (
+              <PasswordFields state={state} />
+            ) : (
+              <ValidationInput state={state} />
+            )}
             <Button
               variant="primary"
               size="lg"

@@ -1,5 +1,5 @@
-const convertStorageSupabaseErrorToKorean = (errorMsg: string) => {
-  switch (errorMsg) {
+const convertStorageSupabaseErrorToKorean = (code: string) => {
+  switch (code) {
     case "NoSuchBucket":
       return "존재하지 않는 버킷입니다. 버킷 이름을 확인하거나 접근 권한을 확인해주세요";
 
@@ -97,7 +97,7 @@ const convertStorageSupabaseErrorToKorean = (errorMsg: string) => {
       return "요청이 너무 많습니다. 잠시 후 다시 시도해주세요";
 
     default:
-      return `스토리지 오류가 발생했습니다: ${errorMsg}`;
+      return undefined;
   }
 };
 

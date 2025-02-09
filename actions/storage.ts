@@ -1,6 +1,5 @@
 "use server";
 
-import { SupabaseStorageError } from "@/error/errors";
 import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
 import { createClient } from "@/utils/supabase/server";
 
@@ -15,8 +14,7 @@ export async function updateAvatar(file: File) {
       upsert: true,
     });
 
-  if (uploadError)
-    throw new SupabaseStorageError("unknown error", uploadError.message);
+  if (uploadError) throw uploadError;
 
   // 2. 이미지 URL 가져오기
   const {
@@ -29,11 +27,7 @@ export async function updateAvatar(file: File) {
     .update({ image: publicUrl })
     .eq("id", user?.id);
 
-  if (updateError)
-    throw new SupabaseStorageError(
-      "unknown error",
-      updateError.message || "아바타 업데이트 중 알 수 없는 에러"
-    );
+  if (updateError) throw updateError;
 
   return publicUrl;
 }
@@ -46,11 +40,7 @@ export async function deleteAvatar() {
     .from("realworldAvtImage")
     .remove([`${user?.id}/avatar.jpg`]);
 
-  if (deleteError)
-    throw new SupabaseStorageError(
-      "unknown error",
-      deleteError.message || "아바타 삭제 중 알 수 없는 에러"
-    );
+  if (deleteError) throw deleteError;
 
   return { success: true };
 }

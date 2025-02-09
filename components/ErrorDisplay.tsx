@@ -8,7 +8,7 @@ export const ErrorDisplay = ({ message }: ErrorDisplayProps) => {
   }
 
   return (
-    <p className="p-4 text-red-500 font-bold">
+    <p className="p-4 text-red-500 font-bold text-xs">
       <span className="mr-2">•</span>
       {message}
     </p>

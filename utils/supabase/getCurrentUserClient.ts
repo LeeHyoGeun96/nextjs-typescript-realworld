@@ -1,6 +1,5 @@
 import { UserField, CurrentUserType } from "@/types/authTypes";
 import { createClient as createClientClient } from "./client";
-import { SupabaseAuthError } from "@/error/errors";
 
 const defaultFields = [
   "id",
@@ -32,7 +31,7 @@ export async function getCurrentUserClient<
   } = await supabase.auth.getUser();
 
   if (error) {
-    throw new SupabaseAuthError(error.code || "unknown error", error.message);
+    throw error;
   }
 
   if (!user) {
@@ -46,10 +45,7 @@ export async function getCurrentUserClient<
     .single();
 
   if (selectError) {
-    throw new SupabaseAuthError(
-      selectError.code || "unknown error",
-      selectError.message
-    );
+    throw selectError;
   }
 
   return data as unknown as Pick<CurrentUserType, T[number]>;

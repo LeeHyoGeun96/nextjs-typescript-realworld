@@ -2,7 +2,6 @@
 
 import { mutate } from "swr";
 import { createClient } from "../supabase/client";
-import { SupabaseAuthError } from "@/error/errors";
 
 export default async function logout() {
   const supabase = createClient();
@@ -10,7 +9,7 @@ export default async function logout() {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    throw new SupabaseAuthError(error.code || "unknown error", error.message);
+    return error;
   }
 
   await mutate("/api/user", null, false);

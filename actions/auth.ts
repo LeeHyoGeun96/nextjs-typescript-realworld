@@ -1,12 +1,17 @@
 "use server";
 
-import { ApiError, SupabaseAuthError, ValidationError } from "@/error/errors";
 import { LoginState, SignupState } from "@/types/authTypes";
-import { validateSignup } from "@/util/validations";
+import { validatePassword, validateSignup } from "@/utils/validations";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { ValidationError } from "@/types/error";
+import { AuthError } from "@supabase/supabase-js";
+import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
 
-export async function login(_: LoginState, formData: FormData) {
+export async function login(
+  _: LoginState,
+  formData: FormData
+): Promise<LoginState> {
   const supabase = await createClient();
 
   const data = {
@@ -18,10 +23,12 @@ export async function login(_: LoginState, formData: FormData) {
 
   if (error) {
     return {
-      error: new SupabaseAuthError(
-        error.code || "unknown error",
-        error.message
-      ),
+      success: false,
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
       value: data,
     };
   }
@@ -33,7 +40,10 @@ export async function login(_: LoginState, formData: FormData) {
   };
 }
 
-export async function signup(_: SignupState, formData: FormData) {
+export async function signup(
+  _: SignupState,
+  formData: FormData
+): Promise<SignupState> {
   const supabase = await createClient();
 
   // type-casting here for convenience
@@ -45,11 +55,14 @@ export async function signup(_: SignupState, formData: FormData) {
     username: formData.get("username") as string,
   };
 
-  const messages = validateSignup(data);
+  const fieldErrors = validateSignup(data);
 
-  if (messages) {
+  if (fieldErrors) {
     return {
-      error: new ValidationError(messages),
+      error: {
+        name: "ValidationError",
+        fieldErrors: fieldErrors,
+      } as ValidationError,
       value: data,
       success: false,
     };
@@ -67,10 +80,11 @@ export async function signup(_: SignupState, formData: FormData) {
 
   if (error) {
     return {
-      error: new SupabaseAuthError(
-        error.code || "unknown error",
-        error.message
-      ),
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
       value: data,
       success: false,
     };
@@ -94,11 +108,77 @@ export async function signInWithGoogle() {
   });
 
   if (error) {
-    console.error(error);
-    throw new ApiError(error.status!, error.message);
+    throw error;
   }
 
   if (data.url) {
     redirect(data.url); // use the redirect API for your server framework
   }
+}
+
+export async function updatePassword(_: unknown, formData: FormData) {
+  const supabase = await createClient();
+  const { id: userId } = await getCurrentUserServer(["id"]);
+
+  const data = {
+    currentPassword: formData.get("currentPassword") as string,
+    password: formData.get("password") as string,
+    passwordConfirm: formData.get("passwordConfirm") as string,
+  };
+
+  const fieldErrors = validatePassword(data);
+
+  if (fieldErrors) {
+    return {
+      error: {
+        name: "ValidationError",
+        fieldErrors: fieldErrors,
+      } as ValidationError,
+      value: data,
+      success: false,
+    };
+  }
+
+  const { data: verifyData, error: verifyError } = await supabase.rpc(
+    "verify_user_password",
+    {
+      user_id: userId,
+      password: data.currentPassword,
+    }
+  );
+
+  if (verifyError) throw verifyError;
+
+  if (!verifyData) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "현재 비밀번호가 잘못되었습니다.",
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: data.password,
+  });
+
+  if (error) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
 }

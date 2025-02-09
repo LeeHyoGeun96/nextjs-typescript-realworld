@@ -1,30 +1,30 @@
-import {
-  PasswordError,
-  SupabaseAuthError,
-  ValidationError,
-} from "@/error/errors";
+import { ApiError } from "@/types/error";
 
 export type ValidationMessages = Record<string, string>;
 
 export interface SignupState {
-  error?: SupabaseAuthError | ValidationError;
+  error?: ApiError;
   value: Record<string, string>;
   success?: boolean;
 }
 
 export interface LoginState {
-  error?: SupabaseAuthError;
+  error?: ApiError;
   value: Record<string, string>;
   success?: boolean;
 }
 
 export interface PasswordState {
-  error?: PasswordError;
-  values: {
+  success?: boolean;
+  error?: ApiError;
+  value: {
+    currentPassword?: string;
     password: string;
-    passwordConfirm: string;
+    passwordConfirm?: string;
   };
 }
+
+export type ApiResponse = SignupState | LoginState | PasswordState;
 
 export interface CurrentUserType {
   id: string;

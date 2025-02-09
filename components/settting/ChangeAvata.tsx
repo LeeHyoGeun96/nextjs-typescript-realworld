@@ -1,7 +1,7 @@
 "use client";
 
 import { useAvatar } from "@/context/avatar/AvatarContext";
-import readFileAsDataURL from "@/util/readFileAsDataURL";
+import readFileAsDataURL from "@/utils/readFileAsDataURL";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { Button } from "../ui/Button/Button";
