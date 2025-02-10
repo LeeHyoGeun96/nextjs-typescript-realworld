@@ -1,29 +1,50 @@
-export interface AuthState {
-  isValid: boolean;
-  errors: Record<string, string>;
-  values: Record<string, string>;
+import { ApiError } from "@/types/error";
+
+export type ValidationMessages = Record<string, string>;
+
+export interface SignupState {
+  error?: ApiError;
+  value: Record<string, string>;
+  success?: boolean;
 }
 
-export interface User {
+export interface LoginState {
+  error?: ApiError;
+  value: Record<string, string>;
+  success?: boolean;
+}
+
+export interface PasswordState {
+  success?: boolean;
+  error?: ApiError;
+  value: {
+    currentPassword?: string;
+    password: string;
+    passwordConfirm?: string;
+  };
+}
+
+export interface ChangeUserInfoState {
+  success?: boolean;
+  error?: ApiError;
+  value: {
+    username?: string;
+    bio?: string;
+  };
+}
+
+export type ApiResponse = SignupState | LoginState | PasswordState;
+
+export interface CurrentUserType {
   id: string;
   email: string;
   username: string;
-  image: string | null;
+  image?: string;
   created_at: string;
   bio?: string;
 }
 
-export type UserField = keyof User;
-
-export interface CurrentUserType {
-  user: {
-    email: string;
-    token: string;
-    username: string;
-    bio: string;
-    image?: string;
-  };
-}
+export type UserField = keyof CurrentUserType;
 
 export interface LoginRequestParams {
   user: {

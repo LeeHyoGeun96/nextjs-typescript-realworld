@@ -1,27 +1,16 @@
-import { AuthState } from "@/types/authTypes";
-
 interface ErrorDisplayProps {
-  authState: AuthState | void;
-  field: string;
+  message?: string;
 }
 
-export const ErrorDisplay = ({ authState, field }: ErrorDisplayProps) => {
-  if (!authState) {
-    return null;
-  }
-
-  if (authState.isValid) {
-    return null;
-  }
-
-  if (!authState.errors[field]) {
+export const ErrorDisplay = ({ message }: ErrorDisplayProps) => {
+  if (!message) {
     return null;
   }
 
   return (
-    <p className="p-4 text-red-500 font-bold">
+    <p className="p-4 text-red-500 font-bold text-xs">
       <span className="mr-2">•</span>
-      {authState.errors[field]}
+      {message}
     </p>
   );
 };

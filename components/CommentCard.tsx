@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { CommentType } from "../types/articleTypes";
-import Avatar from "./Avatar";
+import Avatar from "./ui/Avata/Avatar";
 
 interface CommentCardProps {
   comment: CommentType;

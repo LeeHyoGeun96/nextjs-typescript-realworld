@@ -1,44 +1,22 @@
 "use server";
 
-import { AuthState } from "@/types/authTypes";
-import { validateSignup } from "@/util/validations";
+import {
+  ChangeUserInfoState,
+  LoginState,
+  SignupState,
+} from "@/types/authTypes";
+import { validatePassword, validateSignup } from "@/utils/validations";
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { ValidationError } from "@/types/error";
+import { AuthError } from "@supabase/supabase-js";
+import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
+import { createClientAdmin } from "@/utils/supabase/serverAdmin";
 
-const serverErrorMessages = (errorMsg: string | undefined) => {
-  if (!errorMsg) return { server: "" };
-  const newErrors = { server: "" };
-  if (errorMsg) {
-    switch (errorMsg) {
-      case "Invalid login credentials":
-        newErrors.server = "이메일 또는 비밀번호가 올바르지 않습니다";
-        break;
-
-      case "Too many requests":
-        newErrors.server =
-          "너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요";
-        break;
-
-      case "user_already_exists":
-        newErrors.server = "이미 존재하는 이메일입니다";
-        break;
-
-      case "same_password":
-        newErrors.server =
-          "비밀번호를 업데이트하는 사용자는 현재 사용 중인 것과 다른 비밀번호를 사용해야 합니다.";
-        break;
-
-      default:
-        newErrors.server = "로그인에 실패했습니다";
-        break;
-    }
-  }
-
-  return newErrors;
-};
-
-export async function login(_: AuthState, formData: FormData) {
+export async function login(
+  _: LoginState,
+  formData: FormData
+): Promise<LoginState> {
   const supabase = await createClient();
 
   const data = {
@@ -49,15 +27,28 @@ export async function login(_: AuthState, formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    const formattedErrors = serverErrorMessages(error.message);
-    return { isValid: false, errors: formattedErrors, values: data };
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
+      value: data,
+    };
   }
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
 }
 
-export async function signup(_: AuthState, formData: FormData) {
+export async function signup(
+  _: SignupState,
+  formData: FormData
+): Promise<SignupState> {
   const supabase = await createClient();
 
   // type-casting here for convenience
@@ -69,23 +60,46 @@ export async function signup(_: AuthState, formData: FormData) {
     username: formData.get("username") as string,
   };
 
-  const { isValid, errors } = validateSignup(data);
+  const fieldErrors = validateSignup(data);
 
-  if (!isValid) {
-    return { isValid, errors, values: data };
+  if (fieldErrors) {
+    return {
+      error: {
+        name: "ValidationError",
+        fieldErrors: fieldErrors,
+      } as ValidationError,
+      value: data,
+      success: false,
+    };
   }
 
-  const { error } = await supabase.auth.signUp(data);
+  const { error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+    options: {
+      data: {
+        display_name: data.username,
+      },
+    },
+  });
 
   if (error) {
-    const formattedErrors = serverErrorMessages(error?.code);
-    return { isValid: false, errors: formattedErrors, values: data };
+    return {
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
+      value: data,
+      success: false,
+    };
   }
 
-  revalidatePath("/", "page");
-  revalidatePath("/profile", "layout");
-
-  redirect("/");
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
 }
 
 export async function signInWithGoogle() {
@@ -98,21 +112,191 @@ export async function signInWithGoogle() {
     },
   });
 
-  console.error(error);
+  if (error) {
+    throw error;
+  }
 
   if (data.url) {
     redirect(data.url); // use the redirect API for your server framework
   }
 }
 
-export async function logout() {
+export async function updatePassword(_: unknown, formData: FormData) {
   const supabase = await createClient();
+  const userData = await getCurrentUserServer(["id"]);
 
-  const { error } = await supabase.auth.signOut();
+  const data = {
+    currentPassword: formData.get("currentPassword") as string,
+    password: formData.get("password") as string,
+    passwordConfirm: formData.get("passwordConfirm") as string,
+  };
 
-  if (error) {
-    throw error;
+  if (!userData?.id) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "로그인이 필요합니다.",
+      } as AuthError,
+      value: data,
+    };
   }
 
-  redirect("/");
+  const userId = userData.id;
+
+  const fieldErrors = validatePassword(data);
+
+  if (fieldErrors) {
+    return {
+      error: {
+        name: "ValidationError",
+        fieldErrors: fieldErrors,
+      } as ValidationError,
+      value: data,
+      success: false,
+    };
+  }
+
+  const { data: verifyData, error: verifyError } = await supabase.rpc(
+    "verify_user_password",
+    {
+      user_id: userId,
+      password: data.currentPassword,
+    }
+  );
+
+  if (verifyError) throw verifyError;
+
+  if (!verifyData) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "현재 비밀번호가 잘못되었습니다.",
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: data.password,
+  });
+
+  if (error) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  return {
+    success: true,
+    value: {
+      currentPassword: "",
+      password: "",
+      passwordConfirm: "",
+    },
+    error: undefined,
+  };
+}
+
+export async function ChangeUserInfo(
+  _: ChangeUserInfoState,
+  formData: FormData
+) {
+  const supabase = await createClient();
+  const userData = await getCurrentUserServer(["id"]);
+
+  const data = {
+    username: formData.get("username") as string,
+    bio: formData.get("bio") as string,
+  };
+
+  if (!userData?.id) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "로그인이 필요합니다.",
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  const userId = userData.id;
+
+  const { error } = await supabase
+    .from("users")
+    .update({ username: data.username, bio: data.bio })
+    .eq("id", userId)
+    .select();
+
+  if (error) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "프로필 수정에 실패했습니다.",
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  return {
+    success: true,
+    value: data,
+    error: undefined,
+  };
+}
+
+export async function deleteUser() {
+  const supabase = await createClientAdmin();
+  const userData = await getCurrentUserServer(["id"]);
+
+  if (!userData?.id) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  // 1. 먼저 스토리지의 파일 삭제
+  const { error: objectsError } = await supabase.storage
+    .from(process.env.NEXT_PUBLIC_SUPABASE_BUCKET_NAME!)
+    .remove([`${userData.id}/avatar.jpg`]);
+
+  if (objectsError && objectsError.message !== "The resource was not found") {
+    throw objectsError;
+  }
+
+  // 2. users 테이블의 데이터 삭제
+  const { error: userDataError } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", userData.id);
+
+  if (userDataError) {
+    throw userDataError;
+  }
+
+  // 3. 마지막으로 auth.users에서 사용자 삭제
+  const { error } = await supabase.auth.admin.deleteUser(userData.id);
+
+  if (error) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
+    };
+  }
+
+  return {
+    success: true,
+    error: undefined,
+  };
 }

@@ -1,4 +1,4 @@
-import { PROTECTED_ROUTES } from "@/constants/auth";
+import { PROTECTED_ROUTES } from "@/constant/auth";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
