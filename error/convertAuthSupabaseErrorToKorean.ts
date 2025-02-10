@@ -3,6 +3,7 @@ const convertAuthSupabaseErrorToKorean = (code: string | undefined) => {
 
   switch (code) {
     case "Invalid login credentials":
+    case "invalid_credentials":
       return "이메일 또는 비밀번호가 올바르지 않습니다";
 
     case "Too many requests":

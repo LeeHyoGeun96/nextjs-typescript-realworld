@@ -14,7 +14,9 @@ const defaultFields = [
 
 export default async function getCurrentUserServer<
   T extends UserField[] = typeof defaultFields
->(fields: T = defaultFields as T): Promise<Pick<CurrentUserType, T[number]>> {
+>(
+  fields: T = defaultFields as T
+): Promise<Pick<CurrentUserType, T[number]> | undefined> {
   const supabase = await createClientServer();
   const {
     data: { session },
@@ -26,7 +28,7 @@ export default async function getCurrentUserServer<
   }
 
   if (!session) {
-    throw new Error("세션이 없습니다.");
+    return undefined;
   }
 
   const {

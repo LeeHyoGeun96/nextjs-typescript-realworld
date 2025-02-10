@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { ValidationError } from "@/types/error";
 import { AuthError } from "@supabase/supabase-js";
 import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
+import { createClientAdmin } from "@/utils/supabase/serverAdmin";
 
 export async function login(
   _: LoginState,
@@ -122,13 +123,26 @@ export async function signInWithGoogle() {
 
 export async function updatePassword(_: unknown, formData: FormData) {
   const supabase = await createClient();
-  const { id: userId } = await getCurrentUserServer(["id"]);
+  const userData = await getCurrentUserServer(["id"]);
 
   const data = {
     currentPassword: formData.get("currentPassword") as string,
     password: formData.get("password") as string,
     passwordConfirm: formData.get("passwordConfirm") as string,
   };
+
+  if (!userData?.id) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "로그인이 필요합니다.",
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  const userId = userData.id;
 
   const fieldErrors = validatePassword(data);
 
@@ -182,7 +196,11 @@ export async function updatePassword(_: unknown, formData: FormData) {
 
   return {
     success: true,
-    value: data,
+    value: {
+      currentPassword: "",
+      password: "",
+      passwordConfirm: "",
+    },
     error: undefined,
   };
 }
@@ -192,12 +210,25 @@ export async function ChangeUserInfo(
   formData: FormData
 ) {
   const supabase = await createClient();
-  const { id: userId } = await getCurrentUserServer(["id"]);
+  const userData = await getCurrentUserServer(["id"]);
 
   const data = {
     username: formData.get("username") as string,
     bio: formData.get("bio") as string,
   };
+
+  if (!userData?.id) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: "로그인이 필요합니다.",
+      } as AuthError,
+      value: data,
+    };
+  }
+
+  const userId = userData.id;
 
   const { error } = await supabase
     .from("users")
@@ -219,6 +250,53 @@ export async function ChangeUserInfo(
   return {
     success: true,
     value: data,
+    error: undefined,
+  };
+}
+
+export async function deleteUser() {
+  const supabase = await createClientAdmin();
+  const userData = await getCurrentUserServer(["id"]);
+
+  if (!userData?.id) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  // 1. 먼저 스토리지의 파일 삭제
+  const { error: objectsError } = await supabase.storage
+    .from(process.env.NEXT_PUBLIC_SUPABASE_BUCKET_NAME!)
+    .remove([`${userData.id}/avatar.jpg`]);
+
+  if (objectsError && objectsError.message !== "The resource was not found") {
+    throw objectsError;
+  }
+
+  // 2. users 테이블의 데이터 삭제
+  const { error: userDataError } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", userData.id);
+
+  if (userDataError) {
+    throw userDataError;
+  }
+
+  // 3. 마지막으로 auth.users에서 사용자 삭제
+  const { error } = await supabase.auth.admin.deleteUser(userData.id);
+
+  if (error) {
+    return {
+      success: false,
+      error: {
+        name: "AuthError",
+        message: error.message,
+        code: error.code,
+      } as AuthError,
+    };
+  }
+
+  return {
+    success: true,
     error: undefined,
   };
 }

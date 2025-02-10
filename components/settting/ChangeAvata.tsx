@@ -22,9 +22,13 @@ export default function ChangeAvata() {
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      const base64 = await readFileAsDataURL(file);
-      setImageData(base64);
-      router.push("/settings/avatar");
+      if (file.type.startsWith("image/")) {
+        const base64 = await readFileAsDataURL(file);
+        setImageData(base64);
+        router.push("/settings/avatar");
+      } else {
+        alert("이미지 파일만 선택할 수 있습니다.");
+      }
     }
     event.target.value = "";
   };

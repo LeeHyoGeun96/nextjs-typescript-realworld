@@ -10,6 +10,7 @@ import { InputWithError } from "../InputWithError";
 import { ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
 import getErrorMessage from "@/utils/getErrorMessage";
+import { useRouter } from "next/navigation";
 
 const initialState: PasswordState = {
   error: undefined,
@@ -27,6 +28,7 @@ export default function SecurityForm() {
   );
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
   const [isValid, setIsValid] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formData = new FormData(e.currentTarget.form!);
@@ -47,6 +49,12 @@ export default function SecurityForm() {
     if (!isValid) {
       e.preventDefault();
     }
+  };
+
+  const handleDeleteUser = () => {
+    router.push("/settings/deleteUser", {
+      scroll: false,
+    });
   };
 
   return (
@@ -113,14 +121,22 @@ export default function SecurityForm() {
         </form>
       </section>
 
-      <section>
+      <section className="flex gap-4 flex-col">
         <Button
           variant="outline-danger"
           className="w-full"
           size="lg"
           onClick={logout}
         >
-          Or click here to logout
+          로그아웃
+        </Button>
+        <Button
+          variant="outline-danger"
+          className="w-full"
+          size="lg"
+          onClick={handleDeleteUser}
+        >
+          회원탈퇴
         </Button>
       </section>
     </div>

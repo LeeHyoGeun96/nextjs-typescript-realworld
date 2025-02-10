@@ -32,6 +32,7 @@ const LoginForm = () => {
       action={formAction}
       error={state.error && getErrorMessage(state.error)}
       isPending={isPending}
+      clientIsValid={true}
     >
       <InputWithError
         props={{

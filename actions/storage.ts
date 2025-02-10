@@ -5,12 +5,17 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function updateAvatar(file: File) {
   const supabase = await createClient();
-  const user = await getCurrentUserServer(["id"]);
+  const userData = await getCurrentUserServer(["id"]);
 
+  if (!userData?.id) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  const userId = userData.id;
   // 1. Storage에 이미지 업로드
   const { data: uploadData, error: uploadError } = await supabase.storage
     .from("realworldAvtImage")
-    .upload(`${user?.id}/avatar.jpg`, file, {
+    .upload(`${userId}/avatar.jpg`, file, {
       upsert: true,
     });
 
@@ -25,7 +30,7 @@ export async function updateAvatar(file: File) {
   const { error: updateError } = await supabase
     .from("users")
     .update({ image: publicUrl })
-    .eq("id", user?.id);
+    .eq("id", userId);
 
   if (updateError) throw updateError;
 
@@ -34,13 +39,24 @@ export async function updateAvatar(file: File) {
 
 export async function deleteAvatar() {
   const supabase = await createClient();
-  const user = await getCurrentUserServer(["id"]);
+  const userData = await getCurrentUserServer(["id"]);
+
+  if (!userData?.id) {
+    throw new Error("로그인이 필요합니다.");
+  }
+
+  const userId = userData.id;
 
   const { error: deleteError } = await supabase.storage
     .from("realworldAvtImage")
-    .remove([`${user?.id}/avatar.jpg`]);
+    .remove([`${userId}/avatar.jpg`]);
 
-  if (deleteError) throw deleteError;
+  if (deleteError) {
+    return {
+      success: false,
+      error: deleteError,
+    };
+  }
 
   return { success: true };
 }

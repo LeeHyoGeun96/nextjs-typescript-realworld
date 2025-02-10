@@ -14,7 +14,7 @@ export async function getCurrentUserClient<
   T extends UserField[] = typeof defaultFields
 >(
   fields: T = defaultFields as T
-): Promise<Pick<CurrentUserType, T[number]> | null> {
+): Promise<Pick<CurrentUserType, T[number]> | undefined> {
   const supabase = createClientClient();
 
   const {
@@ -22,7 +22,7 @@ export async function getCurrentUserClient<
   } = await supabase.auth.getSession();
 
   if (!session) {
-    return null;
+    return undefined;
   }
 
   const {
