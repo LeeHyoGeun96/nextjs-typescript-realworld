@@ -1,5 +1,5 @@
 interface ErrorDisplayProps {
-  message?: string;
+  message?: string | null;
 }
 
 export const ErrorDisplay = ({ message }: ErrorDisplayProps) => {

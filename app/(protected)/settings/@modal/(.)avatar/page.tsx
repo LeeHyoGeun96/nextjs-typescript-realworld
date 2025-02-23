@@ -2,13 +2,15 @@
 
 import { updateAvatar } from "@/actions/storage";
 import Crop from "@/components/crop/Crop";
+import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { Button } from "@/components/ui/Button/Button";
 import Modal from "@/components/ui/Modal";
-import { API_ENDPOINTS } from "@/constant/api";
 import { useAvatar } from "@/context/avatar/AvatarContext";
-import { CurrentUserType } from "@/types/authTypes";
+import { useUser } from "@/hooks/useUser";
+import { ResponseUserType } from "@/types/authTypes";
+import { isDisplayError } from "@/types/error";
 import { useRouter } from "next/navigation";
-import { mutate } from "swr";
+import { useState } from "react";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -22,6 +24,9 @@ const fileToBase64 = (file: File): Promise<string> => {
 export default function AvatarModalPage() {
   const router = useRouter();
   const { imageData, setCroppedImage, croppedImage } = useAvatar();
+  const { user, mutate } = useUser();
+  const [displayError, setDisplayError] = useState<string | null>(null);
+  const [unexpectedError, setUnexpectedError] = useState<Error | null>(null);
 
   const handleSave = async () => {
     try {
@@ -29,41 +34,63 @@ export default function AvatarModalPage() {
         const base64Image = await fileToBase64(croppedImage);
 
         await mutate(
-          API_ENDPOINTS.CURRENT_USER,
-          async (currentData: CurrentUserType | undefined) => {
+          async (currentData: ResponseUserType | undefined) => {
             try {
-              const publicUrl = await updateAvatar(croppedImage);
-              if (!currentData?.username) {
-                throw new Error("사용자 정보가 없습니다.");
+              const publicUrl = await updateAvatar(
+                croppedImage,
+                user?.id,
+                user?.token
+              );
+
+              if (!currentData?.user.username) {
+                throw setDisplayError("사용자 정보가 없습니다.");
               }
-              return { ...currentData, image: publicUrl };
+
+              return {
+                ...currentData,
+                user: { ...currentData.user, image: publicUrl },
+              };
             } catch (error) {
-              throw error;
+              if (isDisplayError(error)) {
+                setDisplayError(error.message);
+              } else {
+                setUnexpectedError(error as Error);
+              }
             }
           },
           {
-            optimisticData: (currentData) => ({
+            optimisticData: (currentData: ResponseUserType | undefined) => ({
               ...currentData,
-              image: base64Image,
+              user: { ...currentData?.user, image: base64Image },
             }),
+
             rollbackOnError: true,
             revalidate: false,
           }
         );
-      } else {
-        throw new Error("이미지가 선택되지 않았습니다");
-      }
 
-      router.back();
+        router.back();
+      } else {
+        throw setDisplayError("이미지가 선택되지 않았습니다");
+      }
     } catch (error) {
-      console.error("Error updating avatar:", error);
+      if (isDisplayError(error)) {
+        setDisplayError(error.message);
+      } else {
+        setUnexpectedError(error as Error);
+      }
     }
   };
+
+  if (unexpectedError) {
+    throw unexpectedError;
+  }
 
   return (
     <Modal>
       <Modal.Header>Update Profile Picture</Modal.Header>
       <Modal.Content className="w-full relative">
+        <ErrorDisplay message={displayError} />
         {imageData && (
           <>
             <Crop imageSrc={imageData} setCroppedImage={setCroppedImage} />

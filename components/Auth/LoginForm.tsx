@@ -5,24 +5,32 @@ import { useRouter } from "next/navigation";
 import { login } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
-import getErrorMessage from "@/utils/getErrorMessage";
+import { useUser } from "@/hooks/useUser";
+import { useAuthStore } from "@/lib/zustand/authStore";
 
 const LoginForm = () => {
   const router = useRouter();
+  const { mutate } = useUser();
+  const setToken = useAuthStore((state) => state.setToken);
   const [state, formAction, isPending] = useActionState(login, {
     error: undefined,
     value: {
-      email: "",
-      password: "",
+      inputData: {
+        email: "",
+        password: "",
+      },
+      token: "",
     },
     success: undefined,
   });
 
   useEffect(() => {
     if (state?.success) {
+      setToken(state.value.token!);
       router.push("/");
+      mutate();
     }
-  }, [state?.success, router]);
+  }, [state?.success, router, state?.value.token, mutate, setToken]);
 
   return (
     <AuthFormWrapper
@@ -30,7 +38,7 @@ const LoginForm = () => {
       switchText="Need an account?"
       switchLink="/register"
       action={formAction}
-      error={state.error && getErrorMessage(state.error)}
+      error={state.error?.message}
       isPending={isPending}
       clientIsValid={true}
     >
@@ -41,7 +49,7 @@ const LoginForm = () => {
           placeholder: "Email",
           autoComplete: "email",
           required: true,
-          defaultValue: state?.value?.email || "",
+          defaultValue: state?.value?.inputData?.email || "",
         }}
       />
       <InputWithError

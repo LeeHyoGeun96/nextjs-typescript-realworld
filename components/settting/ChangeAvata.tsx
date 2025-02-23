@@ -5,18 +5,18 @@ import readFileAsDataURL from "@/utils/readFileAsDataURL";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { Button } from "../ui/Button/Button";
-import { API_ENDPOINTS } from "@/constant/api";
 import { TimestampAvatar } from "../ui/Avata/TimestampAvatar";
 import { deleteAvatar } from "@/actions/storage";
-import useSWR from "swr";
-
+import { useUser } from "@/hooks/useUser";
+import { useAuthStore } from "@/lib/zustand/authStore";
+import { ResponseUserType } from "@/types/authTypes";
 export default function ChangeAvata() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setImageData } = useAvatar();
-  const { data: user, mutate: boundMutate } = useSWR(
-    API_ENDPOINTS.CURRENT_USER
-  );
+  const { user, mutate: boundMutate } = useUser();
+  const token = useAuthStore((state) => state.token);
+
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -34,16 +34,27 @@ export default function ChangeAvata() {
   };
 
   const handleDeleteAvatar = async () => {
+    if (!token) {
+      alert("토큰이 존재하지 않습니다.");
+      return;
+    }
+
     await boundMutate(
-      async () => {
-        const { success } = await deleteAvatar();
+      async (prevData: ResponseUserType | undefined) => {
+        const { success } = await deleteAvatar(user.id, token);
         if (!success) {
           throw new Error("Failed to delete avatar");
         }
-        return { ...user, image: null };
+        return {
+          ...prevData,
+          user: { ...prevData?.user, image: null },
+        };
       },
       {
-        optimisticData: { ...user, image: null },
+        optimisticData: (prevData: ResponseUserType | undefined) => ({
+          ...prevData,
+          user: { ...prevData?.user, image: null },
+        }),
         rollbackOnError: true,
         revalidate: false,
       }

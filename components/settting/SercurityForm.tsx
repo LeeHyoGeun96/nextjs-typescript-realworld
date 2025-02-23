@@ -1,32 +1,71 @@
 "use client";
 
 import { Button } from "@/components/ui/Button/Button";
-import logout from "@/utils/auth/logout";
-import { useActionState, useState } from "react";
+import logout from "@/utils/auth/authUtils";
+import { useActionState, useEffect, useState } from "react";
 import { updatePassword } from "@/actions/auth";
-import { PasswordState } from "@/types/authTypes";
+import { UpdatePasswordState } from "@/types/authTypes";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { InputWithError } from "../InputWithError";
-import { ValidationError } from "@/types/error";
+import {
+  createDisplayError,
+  isDisplayError,
+  ValidationError,
+} from "@/types/error";
 import { validatePassword } from "@/utils/validations";
-import getErrorMessage from "@/utils/getErrorMessage";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/lib/zustand/authStore";
 
-const initialState: PasswordState = {
+const initialState: UpdatePasswordState = {
   error: undefined,
   value: {
-    currentPassword: "",
-    password: "",
-    passwordConfirm: "",
+    inputData: {
+      currentPassword: "",
+      password: "",
+      passwordConfirm: "",
+    },
+    token: null,
   },
   success: undefined,
 };
+
 export default function SecurityForm() {
+  const { token, setToken } = useAuthStore((state) => state);
+
+  const updatePasswordWithToken = async (
+    state: UpdatePasswordState,
+    formData: FormData
+  ) => {
+    if (!token) {
+      return {
+        success: false,
+        error: createDisplayError("토큰이 존재하지 않습니다."),
+        value: state.value,
+      };
+    }
+
+    // token을 updatePassword에 인자로 전달
+    const result = await updatePassword(state, formData, token);
+
+    if (result.success) {
+      setToken(result.value.token!);
+    }
+
+    return result;
+  };
+
   const [state, formAction, isPending] = useActionState(
-    updatePassword,
+    updatePasswordWithToken,
     initialState
   );
+
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
+  const [displayError, setDisplayError] = useState<string | undefined>(
+    undefined
+  );
+  const [unexpectedError, setUnexpectedError] = useState<string | undefined>(
+    undefined
+  );
   const [isValid, setIsValid] = useState(false);
   const router = useRouter();
 
@@ -57,6 +96,20 @@ export default function SecurityForm() {
     });
   };
 
+  useEffect(() => {
+    if (state.error) {
+      if (isDisplayError(state.error)) {
+        setDisplayError(state.error.message);
+      } else {
+        setUnexpectedError(state.error.message);
+      }
+    }
+  }, [state.error]);
+
+  if (unexpectedError) {
+    throw new Error(unexpectedError);
+  }
+
   return (
     <div className="flex gap-8 flex-col">
       <section>
@@ -64,14 +117,14 @@ export default function SecurityForm() {
           비밀번호 변경
         </h3>
         <form action={formAction} onSubmit={handleSubmit}>
-          <ErrorDisplay message={state.error && getErrorMessage(state.error)} />
+          <ErrorDisplay message={displayError} />
 
           <InputWithError
             props={{
               type: "password",
               name: "currentPassword",
               placeholder: "기존 비밀번호",
-              defaultValue: state.value.currentPassword,
+              defaultValue: state.value.inputData.currentPassword,
               onChange: handleChange,
             }}
             className="mb-4"
@@ -87,7 +140,7 @@ export default function SecurityForm() {
               type: "password",
               name: "password",
               placeholder: "새로운 비밀번호",
-              defaultValue: state.value.password,
+              defaultValue: state.value.inputData.password,
               onChange: handleChange,
             }}
             className="mb-4"
@@ -103,7 +156,7 @@ export default function SecurityForm() {
               type: "password",
               name: "passwordConfirm",
               placeholder: "새로운 비밀번호 확인",
-              defaultValue: state.value.passwordConfirm,
+              defaultValue: state.value.inputData.passwordConfirm,
               onChange: handleChange,
             }}
             className="mb-4"

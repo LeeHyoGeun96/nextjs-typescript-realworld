@@ -1,4 +1,4 @@
-import useDarkModeStore from "../store/darkModeStore";
+import useDarkModeStore from "../lib/zustand/darkModeStore";
 
 const DarkModeToggle = () => {
   const { isDark, toggle } = useDarkModeStore();

@@ -1,302 +1,267 @@
 "use server";
 
 import {
-  ChangeUserInfoState,
   LoginState,
   SignupState,
+  UpdatePasswordState,
+  UpdateProfileState,
 } from "@/types/authTypes";
-import { validatePassword, validateSignup } from "@/utils/validations";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { ValidationError } from "@/types/error";
-import { AuthError } from "@supabase/supabase-js";
-import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
-import { createClientAdmin } from "@/utils/supabase/serverAdmin";
+import {
+  createDisplayError,
+  UnexpectedError,
+  ValidationError,
+} from "@/types/error";
 
+import { validatePassword, validateSignup } from "@/utils/validations";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+
+// 회원가입
+export async function signUp(
+  _: SignupState,
+  formData: FormData
+): Promise<SignupState> {
+  try {
+    const inputData = {
+      email: formData.get("email") as string,
+      username: formData.get("username") as string,
+      password: formData.get("password") as string,
+      passwordConfirm: formData.get("passwordConfirm") as string,
+    };
+
+    const fieldErrors = validateSignup(inputData);
+
+    if (fieldErrors) {
+      return {
+        error: {
+          name: "ValidationError",
+          fieldErrors: fieldErrors,
+        } as ValidationError,
+        value: { inputData },
+        success: false,
+      };
+    }
+
+    const response = await fetch(`${API_URL}/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user: inputData }),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: createDisplayError(responseData.error, response.status),
+        value: { inputData },
+      };
+    }
+    // 토큰 저장
+
+    return { success: true, value: { inputData } };
+  } catch (error) {
+    return {
+      success: false,
+      error: { name: "UnexpectedError", message: (error as Error).message },
+      value: {
+        inputData: {
+          email: "",
+          username: "",
+          password: "",
+          passwordConfirm: "",
+        },
+      },
+    };
+  }
+}
+
+// 로그인
 export async function login(
   _: LoginState,
   formData: FormData
 ): Promise<LoginState> {
-  const supabase = await createClient();
-
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
-
-  const { error } = await supabase.auth.signInWithPassword(data);
-
-  if (error) {
-    return {
-      success: false,
-      error: {
-        name: "AuthError",
-        message: error.message,
-        code: error.code,
-      } as AuthError,
-      value: data,
+  try {
+    const inputData = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
     };
-  }
 
-  return {
-    success: true,
-    value: data,
-    error: undefined,
-  };
-}
-
-export async function signup(
-  _: SignupState,
-  formData: FormData
-): Promise<SignupState> {
-  const supabase = await createClient();
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-    passwordConfirm: formData.get("passwordConfirm") as string,
-    username: formData.get("username") as string,
-  };
-
-  const fieldErrors = validateSignup(data);
-
-  if (fieldErrors) {
-    return {
-      error: {
-        name: "ValidationError",
-        fieldErrors: fieldErrors,
-      } as ValidationError,
-      value: data,
-      success: false,
-    };
-  }
-
-  const { error } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
-    options: {
-      data: {
-        display_name: data.username,
+    const response = await fetch(`${API_URL}/users/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    },
-  });
+      body: JSON.stringify({ user: inputData }),
+    });
 
-  if (error) {
-    return {
-      error: {
-        name: "AuthError",
-        message: error.message,
-        code: error.code,
-      } as AuthError,
-      value: data,
-      success: false,
-    };
-  }
+    const responseData = await response.json();
 
-  return {
-    success: true,
-    value: data,
-    error: undefined,
-  };
-}
-
-export async function signInWithGoogle() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/callback`,
-      skipBrowserRedirect: true,
-    },
-  });
-
-  if (error) {
-    throw error;
-  }
-
-  if (data.url) {
-    redirect(data.url); // use the redirect API for your server framework
-  }
-}
-
-export async function updatePassword(_: unknown, formData: FormData) {
-  const supabase = await createClient();
-  const userData = await getCurrentUserServer(["id"]);
-
-  const data = {
-    currentPassword: formData.get("currentPassword") as string,
-    password: formData.get("password") as string,
-    passwordConfirm: formData.get("passwordConfirm") as string,
-  };
-
-  if (!userData?.id) {
-    return {
-      success: false,
-      error: {
-        name: "AuthError",
-        message: "로그인이 필요합니다.",
-      } as AuthError,
-      value: data,
-    };
-  }
-
-  const userId = userData.id;
-
-  const fieldErrors = validatePassword(data);
-
-  if (fieldErrors) {
-    return {
-      error: {
-        name: "ValidationError",
-        fieldErrors: fieldErrors,
-      } as ValidationError,
-      value: data,
-      success: false,
-    };
-  }
-
-  const { data: verifyData, error: verifyError } = await supabase.rpc(
-    "verify_user_password",
-    {
-      user_id: userId,
-      password: data.currentPassword,
+    if (!response.ok) {
+      return {
+        success: false,
+        error: createDisplayError(responseData.error, response.status),
+        value: { inputData },
+      };
     }
-  );
 
-  if (verifyError) throw verifyError;
-
-  if (!verifyData) {
+    return {
+      success: true,
+      value: { inputData, token: responseData.user.token },
+    };
+  } catch (error) {
     return {
       success: false,
-      error: {
-        name: "AuthError",
-        message: "현재 비밀번호가 잘못되었습니다.",
-      } as AuthError,
-      value: data,
+      error: { name: "UnexpectedError", message: (error as Error).message },
+      value: { inputData: { email: "", password: "" } },
     };
   }
-
-  const { error } = await supabase.auth.updateUser({
-    password: data.password,
-  });
-
-  if (error) {
-    return {
-      success: false,
-      error: {
-        name: "AuthError",
-        message: error.message,
-        code: error.code,
-      } as AuthError,
-      value: data,
-    };
-  }
-
-  return {
-    success: true,
-    value: {
-      currentPassword: "",
-      password: "",
-      passwordConfirm: "",
-    },
-    error: undefined,
-  };
 }
 
-export async function ChangeUserInfo(
-  _: ChangeUserInfoState,
-  formData: FormData
-) {
-  const supabase = await createClient();
-  const userData = await getCurrentUserServer(["id"]);
+// 패스워드 업데이트
+export async function updatePassword(
+  _: UpdatePasswordState,
+  formData: FormData,
+  token: string
+): Promise<UpdatePasswordState> {
+  try {
+    const inputData = {
+      currentPassword: formData.get("currentPassword") as string,
+      password: formData.get("password") as string,
+      passwordConfirm: formData.get("passwordConfirm") as string,
+    };
 
-  const data = {
-    username: formData.get("username") as string,
-    bio: formData.get("bio") as string,
-  };
+    const fieldErrors = validatePassword(inputData);
 
-  if (!userData?.id) {
+    if (fieldErrors) {
+      return {
+        success: false,
+        error: {
+          name: "ValidationError",
+          fieldErrors: fieldErrors,
+        } as ValidationError,
+        value: { inputData },
+      };
+    }
+
+    const response = await fetch(`${API_URL}/user/password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user: {
+          inputCurrentPassword: inputData.currentPassword,
+          password: inputData.password,
+        },
+      }),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: createDisplayError(responseData.error, response.status),
+        value: { inputData },
+      };
+    }
+
+    return {
+      success: true,
+      value: { inputData, token: responseData.user.token },
+    };
+  } catch (error) {
     return {
       success: false,
       error: {
-        name: "AuthError",
-        message: "로그인이 필요합니다.",
-      } as AuthError,
-      value: data,
+        name: "UnexpectedError",
+        message: (error as Error).message || "예상치 못한 에러가 발생했습니다.",
+      } as UnexpectedError,
+      value: {
+        inputData: { currentPassword: "", password: "", passwordConfirm: "" },
+      },
     };
   }
-
-  const userId = userData.id;
-
-  const { error } = await supabase
-    .from("users")
-    .update({ username: data.username, bio: data.bio })
-    .eq("id", userId)
-    .select();
-
-  if (error) {
-    return {
-      success: false,
-      error: {
-        name: "AuthError",
-        message: "프로필 수정에 실패했습니다.",
-      } as AuthError,
-      value: data,
-    };
-  }
-
-  return {
-    success: true,
-    value: data,
-    error: undefined,
-  };
 }
 
-export async function deleteUser() {
-  const supabase = await createClientAdmin();
-  const userData = await getCurrentUserServer(["id"]);
+// 프로필 업데이트
+export async function updateProfile(
+  _: UpdateProfileState,
+  formData: FormData,
+  token: string
+): Promise<UpdateProfileState> {
+  try {
+    const inputData = {
+      username: formData.get("username") as string,
+      bio: formData.get("bio") as string,
+    };
 
-  if (!userData?.id) {
-    throw new Error("로그인이 필요합니다.");
-  }
+    const response = await fetch(`${API_URL}/user`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        user: {
+          username: formData.get("username"),
+          bio: formData.get("bio"),
+        },
+      }),
+    });
 
-  // 1. 먼저 스토리지의 파일 삭제
-  const { error: objectsError } = await supabase.storage
-    .from(process.env.NEXT_PUBLIC_SUPABASE_BUCKET_NAME!)
-    .remove([`${userData.id}/avatar.jpg`]);
+    const responseData = await response.json();
 
-  if (objectsError && objectsError.message !== "The resource was not found") {
-    throw objectsError;
-  }
+    if (!response.ok) {
+      return {
+        success: false,
+        error: createDisplayError(responseData.error, response.status),
+        value: { inputData },
+      };
+    }
 
-  // 2. users 테이블의 데이터 삭제
-  const { error: userDataError } = await supabase
-    .from("users")
-    .delete()
-    .eq("id", userData.id);
-
-  if (userDataError) {
-    throw userDataError;
-  }
-
-  // 3. 마지막으로 auth.users에서 사용자 삭제
-  const { error } = await supabase.auth.admin.deleteUser(userData.id);
-
-  if (error) {
+    return {
+      success: true,
+      value: { inputData, token: responseData.user.token },
+    };
+  } catch (error) {
     return {
       success: false,
-      error: {
-        name: "AuthError",
-        message: error.message,
-        code: error.code,
-      } as AuthError,
+      error: { name: "UnexpectedError", message: (error as Error).message },
+      value: { inputData: { username: "", bio: "" } },
     };
   }
+}
+// 회원 탈퇴
+export async function deleteAccount(token: string, userId: string) {
+  try {
+    const response = await fetch(`${API_URL}/user`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user: { id: userId } }),
+    });
 
-  return {
-    success: true,
-    error: undefined,
-  };
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: createDisplayError(responseData.error, response.status),
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: { name: "UnexpectedError", message: (error as Error).message },
+    };
+  }
 }

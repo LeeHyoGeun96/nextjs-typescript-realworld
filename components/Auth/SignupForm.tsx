@@ -2,17 +2,16 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signup } from "@/actions/auth";
+import { signUp } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
 import { ValidationError } from "@/types/error";
 import { validateSignup } from "@/utils/validations";
 import { PasswordStrength } from "../PasswordStrength";
-import getErrorMessage from "@/utils/getErrorMessage";
 
 const SignupForm = () => {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(signup, {
+  const [state, formAction, isPending] = useActionState(signUp, {
     error: undefined,
     value: {
       username: "",
@@ -60,7 +59,7 @@ const SignupForm = () => {
       switchLink="/login"
       onSubmit={handleSubmit}
       action={formAction}
-      error={state.error && getErrorMessage(state.error)}
+      error={state.error?.message}
       isPending={isPending}
       clientIsValid={isValid}
     >

@@ -1,5 +1,3 @@
-"use client";
-
 // import PagenatedAticles from "../components/PagenatedAticles";
 
 // const HomePage = () => {
