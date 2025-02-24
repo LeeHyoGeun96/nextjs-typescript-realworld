@@ -5,20 +5,11 @@ import { Button } from "../ui/Button/Button";
 import { useActionState } from "react";
 import { updateProfile } from "@/actions/auth";
 import { ErrorDisplay } from "../ErrorDisplay";
-import { ResponseUserType, UpdateProfileState } from "@/types/authTypes";
+import { ResponseUserType } from "@/types/authTypes";
 import { useUser } from "@/hooks/useUser";
 
 export default function SettingForm() {
-  const updateProfileWithToken = async (
-    state: UpdateProfileState,
-    formData: FormData
-  ) => {
-    const response = await updateProfile(state, formData);
-
-    return response;
-  };
-
-  const [state, formAction] = useActionState(updateProfileWithToken, {
+  const [state, formAction] = useActionState(updateProfile, {
     success: false,
     error: undefined,
     value: { inputData: { username: "", bio: "" } },
