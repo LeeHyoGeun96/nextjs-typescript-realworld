@@ -1,5 +1,5 @@
 export const API_ENDPOINTS = {
-  CURRENT_USER: "/currentUser",
+  CURRENT_USER: "/api/user",
   // 다른 API 엔드포인트들...
 } as const;
 

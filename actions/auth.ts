@@ -11,10 +11,12 @@ import {
   UnexpectedError,
   ValidationError,
 } from "@/types/error";
+import { cookies } from "next/headers";
+import { COOCIE_OPTIONS } from "@/constant/auth";
 
 import { validatePassword, validateSignup } from "@/utils/validations";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 // 회원가입
 export async function signUp(
@@ -22,14 +24,14 @@ export async function signUp(
   formData: FormData
 ): Promise<SignupState> {
   try {
-    const inputData = {
+    const tempInputData = {
       email: formData.get("email") as string,
       username: formData.get("username") as string,
       password: formData.get("password") as string,
       passwordConfirm: formData.get("passwordConfirm") as string,
     };
 
-    const fieldErrors = validateSignup(inputData);
+    const fieldErrors = validateSignup(tempInputData);
 
     if (fieldErrors) {
       return {
@@ -37,7 +39,7 @@ export async function signUp(
           name: "ValidationError",
           fieldErrors: fieldErrors,
         } as ValidationError,
-        value: { inputData },
+        value: { inputData: tempInputData },
         success: false,
       };
     }
@@ -47,7 +49,7 @@ export async function signUp(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user: inputData }),
+      body: JSON.stringify({ user: tempInputData }),
     });
 
     const responseData = await response.json();
@@ -56,13 +58,23 @@ export async function signUp(
       return {
         success: false,
         error: createDisplayError(responseData.error, response.status),
-        value: { inputData },
+        value: { inputData: tempInputData },
       };
     }
-    // 토큰 저장
 
-    return { success: true, value: { inputData } };
+    return {
+      success: true,
+      value: {
+        inputData: {
+          email: "",
+          username: "",
+          password: "",
+          passwordConfirm: "",
+        },
+      },
+    };
   } catch (error) {
+    console.log(error);
     return {
       success: false,
       error: { name: "UnexpectedError", message: (error as Error).message },
@@ -107,6 +119,9 @@ export async function login(
       };
     }
 
+    const cookieStore = await cookies();
+    cookieStore.set("token", responseData.user.token, COOCIE_OPTIONS);
+
     return {
       success: true,
       value: { inputData, token: responseData.user.token },
@@ -123,8 +138,7 @@ export async function login(
 // 패스워드 업데이트
 export async function updatePassword(
   _: UpdatePasswordState,
-  formData: FormData,
-  token: string
+  formData: FormData
 ): Promise<UpdatePasswordState> {
   try {
     const inputData = {
@@ -132,6 +146,17 @@ export async function updatePassword(
       password: formData.get("password") as string,
       passwordConfirm: formData.get("passwordConfirm") as string,
     };
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        error: createDisplayError("로그인 되지 않았습니다."),
+        value: { inputData },
+      };
+    }
 
     const fieldErrors = validatePassword(inputData);
 
@@ -170,9 +195,16 @@ export async function updatePassword(
       };
     }
 
+    cookieStore.set("token", responseData.user.token, {
+      ...COOCIE_OPTIONS,
+    });
+
     return {
       success: true,
-      value: { inputData, token: responseData.user.token },
+      value: {
+        inputData: { currentPassword: "", password: "", passwordConfirm: "" },
+        token: responseData.user.token,
+      },
     };
   } catch (error) {
     return {
@@ -191,10 +223,20 @@ export async function updatePassword(
 // 프로필 업데이트
 export async function updateProfile(
   _: UpdateProfileState,
-  formData: FormData,
-  token: string
+  formData: FormData
 ): Promise<UpdateProfileState> {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return {
+        success: false,
+        error: createDisplayError("로그인 되지 않았습니다."),
+        value: { inputData: { username: "", bio: "" } },
+      };
+    }
+
     const inputData = {
       username: formData.get("username") as string,
       bio: formData.get("bio") as string,
@@ -224,6 +266,10 @@ export async function updateProfile(
       };
     }
 
+    cookieStore.set("token", responseData.user.token, {
+      ...COOCIE_OPTIONS,
+    });
+
     return {
       success: true,
       value: { inputData, token: responseData.user.token },
@@ -237,7 +283,17 @@ export async function updateProfile(
   }
 }
 // 회원 탈퇴
-export async function deleteAccount(token: string, userId: string) {
+export async function deleteAccount(userId: string) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) {
+    return {
+      success: false,
+      error: createDisplayError("로그인 되지 않았습니다."),
+    };
+  }
+
   try {
     const response = await fetch(`${API_URL}/user`, {
       method: "DELETE",
@@ -265,3 +321,7 @@ export async function deleteAccount(token: string, userId: string) {
     };
   }
 }
+
+export const logout = async () => {
+  (await cookies()).delete("token");
+};

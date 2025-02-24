@@ -6,12 +6,10 @@ import { login } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
 import { useUser } from "@/hooks/useUser";
-import { useAuthStore } from "@/lib/zustand/authStore";
 
 const LoginForm = () => {
   const router = useRouter();
   const { mutate } = useUser();
-  const setToken = useAuthStore((state) => state.setToken);
   const [state, formAction, isPending] = useActionState(login, {
     error: undefined,
     value: {
@@ -26,11 +24,10 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (state?.success) {
-      setToken(state.value.token!);
       router.push("/");
       mutate();
     }
-  }, [state?.success, router, state?.value.token, mutate, setToken]);
+  }, [state?.success, router, state?.value.token, mutate]);
 
   return (
     <AuthFormWrapper

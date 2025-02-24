@@ -8,14 +8,12 @@ import { Button } from "../ui/Button/Button";
 import { TimestampAvatar } from "../ui/Avata/TimestampAvatar";
 import { deleteAvatar } from "@/actions/storage";
 import { useUser } from "@/hooks/useUser";
-import { useAuthStore } from "@/lib/zustand/authStore";
 import { ResponseUserType } from "@/types/authTypes";
 export default function ChangeAvata() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setImageData } = useAvatar();
   const { user, mutate: boundMutate } = useUser();
-  const token = useAuthStore((state) => state.token);
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -34,14 +32,9 @@ export default function ChangeAvata() {
   };
 
   const handleDeleteAvatar = async () => {
-    if (!token) {
-      alert("토큰이 존재하지 않습니다.");
-      return;
-    }
-
     await boundMutate(
       async (prevData: ResponseUserType | undefined) => {
-        const { success } = await deleteAvatar(user.id, token);
+        const { success } = await deleteAvatar(user.id);
         if (!success) {
           throw new Error("Failed to delete avatar");
         }

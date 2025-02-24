@@ -1,23 +1,16 @@
 "use client";
 
-import { handleAuthError } from "@/utils/auth/handleAuthError";
+import { API_ENDPOINTS } from "@/constant/api";
 
 export const fetchCurrentUser = async () => {
-  const authStorage =
-    typeof window !== "undefined" ? localStorage.getItem("auth-storage") : null;
-
-  if (!authStorage) return null;
-  const token = JSON.parse(authStorage).state.token;
-
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  const response = await fetch(API_ENDPOINTS.CURRENT_USER, {
+    method: "GET",
+    credentials: "include", // 쿠키 포함
+    cache: "no-store",
   });
 
   if (!response.ok) {
     if (response.status === 401) {
-      handleAuthError();
     }
     return null;
   }

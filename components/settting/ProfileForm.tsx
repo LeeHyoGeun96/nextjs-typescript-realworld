@@ -7,19 +7,13 @@ import { updateProfile } from "@/actions/auth";
 import { ErrorDisplay } from "../ErrorDisplay";
 import { ResponseUserType, UpdateProfileState } from "@/types/authTypes";
 import { useUser } from "@/hooks/useUser";
-import { useAuthStore } from "@/lib/zustand/authStore";
 
 export default function SettingForm() {
-  const { token, setToken } = useAuthStore((state) => state);
   const updateProfileWithToken = async (
     state: UpdateProfileState,
     formData: FormData
   ) => {
-    const response = await updateProfile(state, formData, token!);
-
-    if (response.success) {
-      setToken(response.value.token!);
-    }
+    const response = await updateProfile(state, formData);
 
     return response;
   };
@@ -49,7 +43,6 @@ export default function SettingForm() {
       },
       {
         optimisticData: (prevData: ResponseUserType | undefined) => {
-          console.log("prevData", prevData);
           return {
             ...prevData,
             user: { ...prevData?.user, ...newUser },

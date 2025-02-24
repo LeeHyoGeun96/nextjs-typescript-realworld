@@ -5,9 +5,11 @@ import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/ui/Button/Button";
 import Modal from "@/components/ui/Modal";
+
 import { useUser } from "@/hooks/useUser";
 import { isDisplayError } from "@/types/error";
 import logout from "@/utils/auth/authUtils";
+
 import { useEffect, useState } from "react";
 
 const CHECK_TEXT = "탈퇴하겠습니다";
@@ -30,7 +32,7 @@ export default function DeleteUserModalPage() {
   const handleDeleteUser = async () => {
     if (!valid) return;
 
-    const data = await deleteAccount(user.token, user.id);
+    const data = await deleteAccount(user.id);
     if (!data.success) {
       if (isDisplayError(data.error)) {
         setError(data.error);

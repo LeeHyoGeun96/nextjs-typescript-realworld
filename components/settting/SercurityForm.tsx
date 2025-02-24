@@ -1,20 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/Button/Button";
-import logout from "@/utils/auth/authUtils";
+
 import { useActionState, useEffect, useState } from "react";
 import { updatePassword } from "@/actions/auth";
 import { UpdatePasswordState } from "@/types/authTypes";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { InputWithError } from "../InputWithError";
-import {
-  createDisplayError,
-  isDisplayError,
-  ValidationError,
-} from "@/types/error";
+import { isDisplayError, ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/lib/zustand/authStore";
+import logout from "@/utils/auth/authUtils";
 
 const initialState: UpdatePasswordState = {
   error: undefined,
@@ -30,32 +26,8 @@ const initialState: UpdatePasswordState = {
 };
 
 export default function SecurityForm() {
-  const { token, setToken } = useAuthStore((state) => state);
-
-  const updatePasswordWithToken = async (
-    state: UpdatePasswordState,
-    formData: FormData
-  ) => {
-    if (!token) {
-      return {
-        success: false,
-        error: createDisplayError("토큰이 존재하지 않습니다."),
-        value: state.value,
-      };
-    }
-
-    // token을 updatePassword에 인자로 전달
-    const result = await updatePassword(state, formData, token);
-
-    if (result.success) {
-      setToken(result.value.token!);
-    }
-
-    return result;
-  };
-
   const [state, formAction, isPending] = useActionState(
-    updatePasswordWithToken,
+    updatePassword,
     initialState
   );
 

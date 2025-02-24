@@ -14,13 +14,16 @@ const SignupForm = () => {
   const [state, formAction, isPending] = useActionState(signUp, {
     error: undefined,
     value: {
-      username: "",
-      email: "",
-      password: "",
-      passwordConfirm: "",
+      inputData: {
+        username: "",
+        email: "",
+        password: "",
+        passwordConfirm: "",
+      },
     },
     success: undefined,
   });
+
   const [isValid, setIsValid] = useState(false);
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
@@ -75,7 +78,7 @@ const SignupForm = () => {
           name: "username",
           placeholder: "Username",
           required: true,
-          defaultValue: state?.value?.username || "",
+          defaultValue: state?.value?.inputData?.username || "",
           onChange: handleChange,
         }}
       />
@@ -92,7 +95,7 @@ const SignupForm = () => {
           placeholder: "Email",
           autoComplete: "email",
           required: true,
-          defaultValue: state?.value?.email || "",
+          defaultValue: state?.value?.inputData?.email || "",
           onChange: handleChange,
         }}
       />
@@ -109,13 +112,13 @@ const SignupForm = () => {
           placeholder: "Password",
           autoComplete: "new-password",
           required: true,
-          defaultValue: state?.value?.password || "",
+          defaultValue: state?.value?.inputData?.password || "",
           onChange: handleChange,
           minLength: 8,
           maxLength: 64,
         }}
       />
-      <PasswordStrength password={state?.value?.password || ""} />
+      <PasswordStrength password={state?.value?.inputData?.password || ""} />
       <InputWithError
         errorMessage={
           clientErrors["passwordConfirm"] ??
@@ -129,7 +132,7 @@ const SignupForm = () => {
           placeholder: "Password Confirm",
           autoComplete: "new-password",
           required: true,
-          defaultValue: state?.value?.passwordConfirm || "",
+          defaultValue: state?.value?.inputData?.passwordConfirm || "",
           onChange: handleChange,
         }}
       />

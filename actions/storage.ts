@@ -1,12 +1,16 @@
 "use server";
 
+import { COOCIE_OPTIONS } from "@/constant/auth";
 import { createDisplayError } from "@/types/error";
 import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
-export async function updateAvatar(file: File, userId: string, token: string) {
+export async function updateAvatar(file: File, userId: string) {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   const extension = file.type.split("/")[1];
   const fileName = `avatar.${extension}`; // 또는 원본 파일명 사용
@@ -46,11 +50,16 @@ export async function updateAvatar(file: File, userId: string, token: string) {
 
   if (!response.ok) createDisplayError(responseData.error, response.status);
 
+  cookieStore.set("token", responseData.user.token, COOCIE_OPTIONS);
+
   return publicUrl;
 }
 
-export async function deleteAvatar(userId: string, token: string) {
+export async function deleteAvatar(userId: string) {
   const supabase = await createClient();
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
   const response = await fetch(`${API_URL}/user/image`, {
     method: "DELETE",
@@ -86,6 +95,8 @@ export async function deleteAvatar(userId: string, token: string) {
       };
     }
   }
+
+  cookieStore.set("token", responseData.user.token, COOCIE_OPTIONS);
 
   return { success: true };
 }

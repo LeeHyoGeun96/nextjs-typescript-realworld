@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/ui/Header/Header";
 import { Roboto } from "next/font/google";
-import { ClientInitializer } from "@/components/Auth/ClientInitializer";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,10 +23,8 @@ export default async function RootLayout({
   return (
     <html lang="kr" className={roboto.variable}>
       <body>
-        <ClientInitializer>
-          <Header />
-          {children}
-        </ClientInitializer>
+        <Header />
+        {children}
       </body>
     </html>
   );

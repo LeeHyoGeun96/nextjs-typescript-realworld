@@ -36,11 +36,7 @@ export default function AvatarModalPage() {
         await mutate(
           async (currentData: ResponseUserType | undefined) => {
             try {
-              const publicUrl = await updateAvatar(
-                croppedImage,
-                user?.id,
-                user?.token
-              );
+              const publicUrl = await updateAvatar(croppedImage, user?.id);
 
               if (!currentData?.user.username) {
                 throw setDisplayError("사용자 정보가 없습니다.");
