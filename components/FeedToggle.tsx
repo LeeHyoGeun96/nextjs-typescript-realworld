@@ -1,4 +1,6 @@
-import { Link, useSearchParams } from "react-router-dom";
+"use client";
+
+import { useRouter } from "next/navigation";
 
 interface FeedToggleProps {
   params: {
@@ -6,18 +8,20 @@ interface FeedToggleProps {
     tag: string | undefined;
   };
   isLoggedIn: boolean;
-  onTabChange: (tab: "global" | "personal") => void;
+
   disabled?: boolean;
 }
 
-const FeedToggle = ({ params, isLoggedIn, onTabChange }: FeedToggleProps) => {
-  const [searchParams] = useSearchParams();
+const FeedToggle = ({ params, isLoggedIn }: FeedToggleProps) => {
+  const router = useRouter();
 
-  const handleStateChange = (e: any) => {
-    const tab = new URLSearchParams(e.currentTarget.getAttribute("to")).get(
-      "tab"
-    ) as "global" | "personal";
-    if (tab) onTabChange(tab);
+  const tab = params?.tab ?? "global";
+  const tag = params?.tag ?? "";
+
+  const handleStateChange = (tab: "global" | "personal") => {
+    const current = new URLSearchParams();
+    current.set("tab", tab);
+    router.push(`?${current.toString()}`);
   };
 
   const baseTabStyle = "inline-block px-4 py-2 transition-colors duration-200";
@@ -31,37 +35,29 @@ const FeedToggle = ({ params, isLoggedIn, onTabChange }: FeedToggleProps) => {
       <ul className="flex flex-wrap gap-x-1">
         {isLoggedIn && (
           <li>
-            <Link
-              to="?tab=personal"
-              state={{ from: searchParams.toString() }}
-              onClick={handleStateChange}
+            <button
+              onClick={() => handleStateChange("personal")}
               className={`${baseTabStyle} ${
-                params.tab === "personal" ? activeTabStyle : inactiveTabStyle
+                tab === "personal" ? activeTabStyle : inactiveTabStyle
               }`}
             >
               Your Feed
-            </Link>
+            </button>
           </li>
         )}
         <li>
-          <Link
-            to="?tab=global"
-            state={{ from: searchParams.toString() }}
-            onClick={handleStateChange}
+          <button
+            onClick={() => handleStateChange("global")}
             className={`${baseTabStyle} ${
-              params.tab === "global" && !params.tag
-                ? activeTabStyle
-                : inactiveTabStyle
+              tab === "global" && !tag ? activeTabStyle : inactiveTabStyle
             }`}
           >
             Global Feed
-          </Link>
+          </button>
         </li>
-        {params.tag && (
+        {tag && (
           <li>
-            <span className={`${baseTabStyle} ${activeTabStyle}`}>
-              #{params.tag}
-            </span>
+            <span className={`${baseTabStyle} ${activeTabStyle}`}>#{tag}</span>
           </li>
         )}
       </ul>

@@ -12,7 +12,7 @@ import {
   ValidationError,
 } from "@/types/error";
 import { cookies } from "next/headers";
-import { COOCIE_OPTIONS } from "@/constant/auth";
+import { COOKIE_OPTIONS } from "@/constant/auth";
 
 import { validatePassword, validateSignup } from "@/utils/validations";
 
@@ -120,7 +120,7 @@ export async function login(
     }
 
     const cookieStore = await cookies();
-    cookieStore.set("token", responseData.user.token, COOCIE_OPTIONS);
+    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
     return {
       success: true,
@@ -195,9 +195,7 @@ export async function updatePassword(
       };
     }
 
-    cookieStore.set("token", responseData.user.token, {
-      ...COOCIE_OPTIONS,
-    });
+    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
     return {
       success: true,
@@ -266,9 +264,7 @@ export async function updateProfile(
       };
     }
 
-    cookieStore.set("token", responseData.user.token, {
-      ...COOCIE_OPTIONS,
-    });
+    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
     return {
       success: true,

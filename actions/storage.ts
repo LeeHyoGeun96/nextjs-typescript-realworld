@@ -1,6 +1,6 @@
 "use server";
 
-import { COOCIE_OPTIONS } from "@/constant/auth";
+import { COOKIE_OPTIONS } from "@/constant/auth";
 import { createDisplayError } from "@/types/error";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
@@ -50,7 +50,7 @@ export async function updateAvatar(file: File, userId: string) {
 
   if (!response.ok) createDisplayError(responseData.error, response.status);
 
-  cookieStore.set("token", responseData.user.token, COOCIE_OPTIONS);
+  cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
   return publicUrl;
 }
@@ -96,7 +96,7 @@ export async function deleteAvatar(userId: string) {
     }
   }
 
-  cookieStore.set("token", responseData.user.token, COOCIE_OPTIONS);
+  cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
   return { success: true };
 }

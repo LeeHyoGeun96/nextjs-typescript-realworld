@@ -1,20 +1,20 @@
-import { Link } from "react-router-dom";
-import { ArticleType } from "../types/articleTypes";
-import Avatar from "./ui/Avata/Avatar";
+import Link from "next/link";
+import { ArticleType } from "../../types/articleTypes";
+import Avatar from "../ui/Avata/Avatar";
 
 interface ArticleListProps {
   articles: ArticleType[];
-  favoriteArticle: (slug: string) => void;
-  unfavoriteArticle: (slug: string) => void;
-  isPending: boolean;
+  // favoriteArticle: (slug: string) => void;
+  // unfavoriteArticle: (slug: string) => void;
+  // isPending: boolean;
 }
 
 const ArticleList = ({
   articles,
-  favoriteArticle,
-  unfavoriteArticle,
-  isPending,
-}: ArticleListProps) => {
+}: // favoriteArticle,
+// unfavoriteArticle,
+// isPending,
+ArticleListProps) => {
   if (articles.length === 0) {
     return (
       <div className="text-center text-gray-500 py-4">데이터가 없습니다.</div>
@@ -27,7 +27,7 @@ const ArticleList = ({
         <article key={article.slug} className="py-6">
           <header className="flex items-center mb-4">
             <Link
-              to={`/profile/${article.author.username}`}
+              href={`/profile/${article.author.username}`}
               className=" flex-shrink-0"
             >
               <Avatar
@@ -39,7 +39,7 @@ const ArticleList = ({
             </Link>
             <div className="flex flex-col ml-3 flex-grow">
               <Link
-                to={`/profile/${article.author.username}`}
+                href={`/profile/${article.author.username}`}
                 className="text-brand-primary hover:text-brand-secondary font-medium"
               >
                 {article.author.username}
@@ -56,18 +56,18 @@ const ArticleList = ({
                     : "border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
                 }`}
               type="button"
-              disabled={isPending}
-              onClick={() =>
-                article.favorited
-                  ? unfavoriteArticle(article.slug)
-                  : favoriteArticle(article.slug)
-              }
+              // disabled={isPending}
+              // onClick={() =>
+              //   article.favorited
+              //     ? unfavoriteArticle(article.slug)
+              //     : favoriteArticle(article.slug)
+              // }
             >
               <i className="ion-heart" aria-hidden="true"></i>
               <span>{article.favoritesCount}</span>
             </button>
           </header>
-          <Link to={`/article/${article.slug}`} className="block group ">
+          <Link href={`/article/${article.slug}`} className="block group ">
             <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100 group-hover:text-brand-primary">
               {article.title}
             </h2>
