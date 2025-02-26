@@ -96,7 +96,7 @@ export async function deleteAvatar(userId: string) {
     }
   }
 
-  cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
+  cookieStore.set("token", responseData.token, COOKIE_OPTIONS);
 
   return { success: true };
 }
