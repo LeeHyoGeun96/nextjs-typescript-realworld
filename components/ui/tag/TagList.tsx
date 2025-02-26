@@ -28,7 +28,7 @@ const TagList = memo(
 
         const current = new URLSearchParams();
         current.set("tag", tag);
-        router.push(`?${current.toString()}`);
+        router.push(`/?${current.toString()}`);
       },
       [router]
     );
