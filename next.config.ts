@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
       {
@@ -19,6 +18,12 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "zlhxeyrnpqvfarblsxzx.supabase.co",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "iuvvrxiwzvaohvbqylau.supabase.co", // 새로운 Supabase 도메인 추가
         port: "",
         pathname: "/**",
       },

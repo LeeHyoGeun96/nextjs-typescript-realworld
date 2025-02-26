@@ -1,7 +1,7 @@
 // import { useSuspenseQuery } from "@tanstack/react-query";
 // import { Link, NavLink, useMatch, useParams } from "react-router-dom";
 // import { profileQueryOptions } from "../queryOptions/profileQueryOptions";
-// import { useUserStore } from "../store/userStore";
+// import { Store } from "../store/userStore";
 // import NetworkError from "../errors/NetworkError";
 // import { articleQueryOptions } from "../queryOptions/articleQueryOptions";
 // import { usePaginationParams } from "../hooks/usePaginationParams";

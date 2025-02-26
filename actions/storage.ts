@@ -1,22 +1,26 @@
 "use server";
 
-import getCurrentUserServer from "@/utils/supabase/getCurrentUserServer";
+import { COOKIE_OPTIONS } from "@/constant/auth";
+import { createDisplayError } from "@/types/error";
 import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
-export async function updateAvatar(file: File) {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+
+export async function updateAvatar(file: File, userId: string) {
   const supabase = await createClient();
-  const userData = await getCurrentUserServer(["id"]);
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
-  if (!userData?.id) {
-    throw new Error("로그인이 필요합니다.");
-  }
+  const extension = file.type.split("/")[1];
+  const fileName = `avatar.${extension}`; // 또는 원본 파일명 사용
 
-  const userId = userData.id;
   // 1. Storage에 이미지 업로드
   const { data: uploadData, error: uploadError } = await supabase.storage
-    .from("realworldAvtImage")
-    .upload(`${userId}/avatar.jpg`, file, {
+    .from(`${process.env.NEXT_PUBLIC_STORAGE_BUCKET}`)
+    .upload(`${userId}/${fileName}`, file, {
       upsert: true,
+      contentType: file.type,
     });
 
   if (uploadError) throw uploadError;
@@ -24,39 +28,75 @@ export async function updateAvatar(file: File) {
   // 2. 이미지 URL 가져오기
   const {
     data: { publicUrl },
-  } = supabase.storage.from("realworldAvtImage").getPublicUrl(uploadData.path);
+  } = supabase.storage
+    .from(`${process.env.NEXT_PUBLIC_STORAGE_BUCKET}`)
+    .getPublicUrl(uploadData.path);
 
   // 3. 프로필 업데이트
-  const { error: updateError } = await supabase
-    .from("users")
-    .update({ image: publicUrl })
-    .eq("id", userId);
+  const response = await fetch(`${API_URL}/user/image`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      user: {
+        image: publicUrl,
+      },
+    }),
+  });
 
-  if (updateError) throw updateError;
+  const responseData = await response.json();
+
+  if (!response.ok) createDisplayError(responseData.error, response.status);
+
+  cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
   return publicUrl;
 }
 
-export async function deleteAvatar() {
+export async function deleteAvatar(userId: string) {
   const supabase = await createClient();
-  const userData = await getCurrentUserServer(["id"]);
 
-  if (!userData?.id) {
-    throw new Error("로그인이 필요합니다.");
-  }
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
-  const userId = userData.id;
+  const response = await fetch(`${API_URL}/user/image`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  const { error: deleteError } = await supabase.storage
-    .from("realworldAvtImage")
-    .remove([`${userId}/avatar.jpg`]);
+  const responseData = await response.json();
 
-  if (deleteError) {
+  if (!response.ok) throw new Error(responseData.error);
+
+  const { data: files, error: listError } = await supabase.storage
+    .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
+    .list(userId);
+
+  if (listError) {
     return {
       success: false,
-      error: deleteError,
+      error: createDisplayError(listError),
     };
   }
+
+  if (files && files.length > 0) {
+    const { error: deleteError } = await supabase.storage
+      .from(process.env.NEXT_PUBLIC_STORAGE_BUCKET!)
+      .remove([`${userId}/${files[0].name}`]); // 정확한 파일 경로 지정
+
+    if (deleteError) {
+      return {
+        success: false,
+        error: createDisplayError(deleteError),
+      };
+    }
+  }
+
+  cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
 
   return { success: true };
 }

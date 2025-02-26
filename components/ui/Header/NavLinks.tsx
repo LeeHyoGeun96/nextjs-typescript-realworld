@@ -10,19 +10,15 @@ import {
 } from "./icons";
 
 import { TimestampAvatar } from "../Avata/TimestampAvatar";
-import useSWR from "swr";
-import { getCurrentUserClient } from "@/utils/supabase/getCurrentUserClient";
-import { API_ENDPOINTS } from "@/constant/api";
+
+import { useUser } from "@/hooks/useUser";
 
 interface NavLinksProps {
   isMobile?: boolean;
 }
 
 export const NavLinks = ({ isMobile }: NavLinksProps) => {
-  const { data: user } = useSWR(API_ENDPOINTS.CURRENT_USER, () =>
-    getCurrentUserClient(["image", "username"])
-  );
-  const isLoggedIn = !!user;
+  const { user, isLoggedIn } = useUser();
 
   return (
     <>

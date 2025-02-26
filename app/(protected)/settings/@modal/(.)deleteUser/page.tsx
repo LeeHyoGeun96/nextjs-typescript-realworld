@@ -1,13 +1,15 @@
 "use client";
 
-import { deleteUser } from "@/actions/auth";
+import { deleteAccount } from "@/actions/auth";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/ui/Button/Button";
 import Modal from "@/components/ui/Modal";
-import convertAuthSupabaseErrorToKorean from "@/error/convertAuthSupabaseErrorToKorean";
-import logout from "@/utils/auth/logout";
-import { AuthError } from "@supabase/supabase-js";
+
+import { useUser } from "@/hooks/useUser";
+import { isDisplayError } from "@/types/error";
+import logout from "@/utils/auth/authUtils";
+
 import { useEffect, useState } from "react";
 
 const CHECK_TEXT = "탈퇴하겠습니다";
@@ -17,8 +19,9 @@ export default function DeleteUserModalPage() {
   const handleCheckText = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValid(e.target.value === CHECK_TEXT);
   };
-  const [error, setError] = useState<AuthError | null>(null);
+  const [error, setError] = useState<Error | null>(null);
   const [unexpectedError, setUnexpectedError] = useState<Error | null>(null);
+  const { user } = useUser();
 
   useEffect(() => {
     if (unexpectedError) {
@@ -29,15 +32,15 @@ export default function DeleteUserModalPage() {
   const handleDeleteUser = async () => {
     if (!valid) return;
 
-    try {
-      const { success, error } = await deleteUser();
-      if (!success) {
-        setError(error || null);
+    const data = await deleteAccount(user.id);
+    if (!data.success) {
+      if (isDisplayError(data.error)) {
+        setError(data.error);
       } else {
-        logout();
+        setUnexpectedError(data.error!);
       }
-    } catch (error) {
-      setUnexpectedError(error as Error);
+    } else {
+      logout();
     }
   };
 
@@ -46,11 +49,7 @@ export default function DeleteUserModalPage() {
       <Modal>
         <Modal.Header>회원 탈퇴</Modal.Header>
         <Modal.Content className="p-4">
-          <ErrorDisplay
-            message={
-              convertAuthSupabaseErrorToKorean(error?.code) || error?.message
-            }
-          />
+          <ErrorDisplay message={error?.message} />
           <p>회원 탈퇴 시 모든 데이터가 삭제됩니다.</p>
           <p className="mb-4">
             정말 탈퇴하시겠습니까? 원한다면{" "}

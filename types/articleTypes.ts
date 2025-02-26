@@ -19,6 +19,11 @@ export interface ArticleType {
   author: AuthorType;
 }
 
+export interface ArticleInterfaceType {
+  articles: ArticleType[];
+  articlesCount: number;
+}
+
 export interface CommentType {
   id: number;
   createdAt: string;
@@ -129,13 +134,13 @@ export interface FavoriteArticleResponse {
 }
 
 // DTO 타입들
-export type GetUniqueArticleDTO = Omit<GetUniqueArticleRequestParams, 'token'>;
+export type GetUniqueArticleDTO = Omit<GetUniqueArticleRequestParams, "token">;
 
-export type CreateArticleDTO = Omit<CreateArticleRequestParams, 'token'>;
+export type CreateArticleDTO = Omit<CreateArticleRequestParams, "token">;
 
 export type UpdateArticleDTO = Omit<
   UpdateArticleRequestParams,
-  'token' | 'slug'
+  "token" | "slug"
 >;
 
 export type AddCommentDTO = {

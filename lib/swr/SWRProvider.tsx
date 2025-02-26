@@ -1,33 +1,35 @@
 "use client";
 
-import { CurrentUserType } from "@/types/authTypes";
-import { fetcher } from "./fetcher";
+import { ArticleType } from "@/types/articleTypes";
 import { SWRConfig } from "swr";
-import { API_ENDPOINTS } from "@/constant/api";
 
-// API 응답 타입들을 모아둔 타입
-type ApiResponse = {
-  [API_ENDPOINTS.CURRENT_USER]: CurrentUserType | null;
-  // 다른 API 엔드포인트의 응답 타입 추가
-  // [API_ENDPOINTS.POSTS]: Post[];
-  // [API_ENDPOINTS.COMMENTS]: Comment[];
+type ArticlesFallback = {
+  [key: string]: {
+    globalArticles?: ArticleType[];
+    globalArticlesCount?: number;
+    feedArticles?: ArticleType[];
+    feedArticlesCount?: number;
+  };
 };
 
-interface FallbackData {
-  [key: string]: ApiResponse[keyof ApiResponse]; // 모든 가능한 응답 타입
-}
-
-export function SWRProvider({
+export default function SWRProvider({
   children,
   fallback,
 }: {
   children: React.ReactNode;
-  fallback: Partial<FallbackData>;
+  fallback: ArticlesFallback;
 }) {
   return (
     <SWRConfig
       value={{
-        fetcher,
+        fetcher: async (url) => {
+          const response = await fetch(url, {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store",
+          });
+          return response.json();
+        },
         fallback,
         revalidateOnFocus: false,
       }}

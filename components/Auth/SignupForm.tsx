@@ -2,26 +2,28 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signup } from "@/actions/auth";
+import { signUp } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
 import { ValidationError } from "@/types/error";
 import { validateSignup } from "@/utils/validations";
 import { PasswordStrength } from "../PasswordStrength";
-import getErrorMessage from "@/utils/getErrorMessage";
 
 const SignupForm = () => {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(signup, {
+  const [state, formAction, isPending] = useActionState(signUp, {
     error: undefined,
     value: {
-      username: "",
-      email: "",
-      password: "",
-      passwordConfirm: "",
+      inputData: {
+        username: "",
+        email: "",
+        password: "",
+        passwordConfirm: "",
+      },
     },
     success: undefined,
   });
+
   const [isValid, setIsValid] = useState(false);
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
@@ -60,7 +62,7 @@ const SignupForm = () => {
       switchLink="/login"
       onSubmit={handleSubmit}
       action={formAction}
-      error={state.error && getErrorMessage(state.error)}
+      error={state.error?.message}
       isPending={isPending}
       clientIsValid={isValid}
     >
@@ -76,7 +78,7 @@ const SignupForm = () => {
           name: "username",
           placeholder: "Username",
           required: true,
-          defaultValue: state?.value?.username || "",
+          defaultValue: state?.value?.inputData?.username || "",
           onChange: handleChange,
         }}
       />
@@ -93,7 +95,7 @@ const SignupForm = () => {
           placeholder: "Email",
           autoComplete: "email",
           required: true,
-          defaultValue: state?.value?.email || "",
+          defaultValue: state?.value?.inputData?.email || "",
           onChange: handleChange,
         }}
       />
@@ -110,13 +112,13 @@ const SignupForm = () => {
           placeholder: "Password",
           autoComplete: "new-password",
           required: true,
-          defaultValue: state?.value?.password || "",
+          defaultValue: state?.value?.inputData?.password || "",
           onChange: handleChange,
           minLength: 8,
           maxLength: 64,
         }}
       />
-      <PasswordStrength password={state?.value?.password || ""} />
+      <PasswordStrength password={state?.value?.inputData?.password || ""} />
       <InputWithError
         errorMessage={
           clientErrors["passwordConfirm"] ??
@@ -130,7 +132,7 @@ const SignupForm = () => {
           placeholder: "Password Confirm",
           autoComplete: "new-password",
           required: true,
-          defaultValue: state?.value?.passwordConfirm || "",
+          defaultValue: state?.value?.inputData?.passwordConfirm || "",
           onChange: handleChange,
         }}
       />

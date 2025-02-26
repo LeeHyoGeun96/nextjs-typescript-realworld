@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ErrorDisplay } from "../ErrorDisplay";
 import { Button } from "../ui/Button/Button";
-import GoogleLoginBtn from "../GoogleLoginBtn";
 
 export interface AuthFormProps {
   title: string;
@@ -60,14 +59,6 @@ export const AuthFormWrapper = ({
               {title}
             </Button>
           </form>
-
-          <section className="mt-8">
-            <div className="mt-6">
-              <GoogleLoginBtn
-                type={title.toLowerCase() as "login" | "register"}
-              />
-            </div>
-          </section>
         </section>
       </div>
     </div>

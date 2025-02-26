@@ -17,7 +17,7 @@ interface AvatarProps {
   image?: string | null;
   size?: TimestampAvatarSize;
   className?: string;
-  timestamp: string;
+  timestamp?: string;
 }
 
 const Avatar = ({

@@ -1,47 +1,67 @@
-import { ApiError } from "@/types/error";
+import { ApiError } from "./error";
 
 export type ValidationMessages = Record<string, string>;
 
 export interface SignupState {
   error?: ApiError;
-  value: Record<string, string>;
+  value: {
+    inputData: {
+      email: string;
+      username: string;
+      password: string;
+      passwordConfirm: string;
+    };
+  };
   success?: boolean;
 }
 
 export interface LoginState {
   error?: ApiError;
-  value: Record<string, string>;
+  value: {
+    inputData: {
+      email: string;
+      password: string;
+    };
+    token?: string;
+  };
   success?: boolean;
 }
 
-export interface PasswordState {
+export interface UpdatePasswordState {
   success?: boolean;
   error?: ApiError;
   value: {
-    currentPassword?: string;
-    password: string;
-    passwordConfirm?: string;
+    inputData: {
+      currentPassword: string;
+      password: string;
+      passwordConfirm: string;
+    };
+    token?: string | null;
   };
 }
 
-export interface ChangeUserInfoState {
+export interface UpdateProfileState {
   success?: boolean;
   error?: ApiError;
   value: {
-    username?: string;
-    bio?: string;
+    inputData: {
+      username?: string;
+      bio?: string;
+    };
+    token?: string | null;
   };
 }
-
-export type ApiResponse = SignupState | LoginState | PasswordState;
 
 export interface CurrentUserType {
   id: string;
   email: string;
   username: string;
-  image?: string;
-  created_at: string;
-  bio?: string;
+  bio: string | null;
+  image: string | null;
+}
+
+export interface ResponseUserType {
+  user: CurrentUserType;
 }
 
 export type UserField = keyof CurrentUserType;
@@ -52,36 +72,3 @@ export interface LoginRequestParams {
     password: string;
   };
 }
-
-export type LoginDTO = LoginRequestParams;
-
-export type LoginResponse = CurrentUserType;
-
-export interface SignupFormDataType {
-  username: string;
-  email: string;
-  password: string;
-}
-export interface SignupDTO {
-  user: SignupFormDataType;
-}
-
-export type SignupRequestParams = SignupFormDataType;
-
-export type SignupResponse = CurrentUserType;
-
-export interface ValidationErrors {
-  [key: string]: string[];
-}
-
-export interface UpdateUserRequest {
-  user: {
-    email?: string;
-    password?: string;
-    username?: string;
-    bio?: string;
-    image?: string;
-  };
-}
-
-export type UpdateUserResponse = CurrentUserType;
