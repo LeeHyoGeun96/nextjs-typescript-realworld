@@ -1,7 +1,7 @@
 import FeedToggle from "@/components/FeedToggle";
 import ArticleList from "@/components/Home/ArticleList";
 import { Pagination } from "@/components/Home/Pagination";
-import SelectTag from "@/components/SelectTag";
+import SelectTag from "@/components/ui/tag/SelectTag";
 import SWRProvider from "@/lib/swr/SWRProvider";
 import { SearchParams } from "@/types/global";
 import { parseQueryParams } from "@/utils/parseQueryParams";

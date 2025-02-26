@@ -7,6 +7,8 @@ import useSWR from "swr";
 import { ArticleInterfaceType, ArticleType } from "@/types/articleTypes";
 import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
+import TagList from "../ui/tag/TagList";
+
 interface ArticleListProps {
   apiQueryString: string;
   tab: string;
@@ -86,6 +88,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
       }
     );
   };
+
   return (
     <section
       aria-label="게시글 목록"
@@ -143,16 +146,13 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
                 <span className="text-brand-primary text-sm mb-2 sm:mb-0">
                   Read more...
                 </span>
-                <ul className="flex flex-wrap gap-2" aria-label="태그 목록">
-                  {article.tagList.map((tag) => (
-                    <li
-                      key={tag}
-                      className="px-2 py-1 text-xs rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
-                    >
-                      {tag}
-                    </li>
-                  ))}
-                </ul>
+                {article.tagList.length > 0 && (
+                  <TagList
+                    tags={article.tagList}
+                    showDeleteButton={false}
+                    className="flex-wrap"
+                  />
+                )}
               </footer>
             </Link>
           </div>
