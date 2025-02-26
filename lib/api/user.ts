@@ -1,5 +1,3 @@
-"use client";
-
 import { API_ENDPOINTS } from "@/constant/api";
 
 export const fetchCurrentUser = async () => {

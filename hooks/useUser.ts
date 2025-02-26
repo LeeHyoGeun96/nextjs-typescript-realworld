@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { API_ENDPOINTS } from "@/constant/api";
-import { fetchCurrentUser } from "@/utils/auth/user";
+import { fetchCurrentUser } from "@/lib/api/user";
 
 export const useUser = () => {
   const { data, error, isLoading, mutate } = useSWR(

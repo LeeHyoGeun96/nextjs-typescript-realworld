@@ -2,21 +2,15 @@ import FeedToggle from "@/components/FeedToggle";
 import ArticleList from "@/components/Home/ArticleList";
 import { Pagination } from "@/components/Home/Pagination";
 import SelectTag from "@/components/SelectTag";
+import SWRProvider from "@/lib/swr/SWRProvider";
+import { SearchParams } from "@/types/global";
+import { parseQueryParams } from "@/utils/parseQueryParams";
 import { cookies } from "next/headers";
-
-interface ArticleParams {
-  page?: string;
-  limit?: string;
-  tag?: string;
-  author?: string;
-  favorited?: string;
-  tab?: string;
-}
 
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<ArticleParams>;
+  searchParams: SearchParams;
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
@@ -24,89 +18,86 @@ export default async function HomePage({
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  const params = await searchParams;
 
-  const page = Number(params.page) || 1;
-  const limit = Number(params.limit) || 10;
-  const offset = (page - 1) * limit;
+  const { apiQueryString, tab, tag } = await parseQueryParams(searchParams);
 
-  const queryParams = new URLSearchParams({
-    offset: offset.toString(),
-    limit: limit.toString(),
-    ...(params.tag && { tag: params.tag }),
-    ...(params.author && { author: params.author }),
-  });
-
-  const articlesResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/articles?${queryParams}`,
-    {
+  // API 요청을 병렬로 실행
+  const [articlesResponse, feedResponse, tagsResponse] = await Promise.all([
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles?${apiQueryString}`, {
       headers,
       cache: "no-store",
-    }
-  );
-
-  const feedResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/articles/feed?${queryParams}`,
-    {
+    }),
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/articles/feed?${apiQueryString}`,
+      {
+        headers,
+        cache: "no-store",
+      }
+    ),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/tags`, {
       headers,
       cache: "no-store",
-    }
-  );
+    }),
+  ]);
 
-  const tagsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tags`, {
-    headers,
-    cache: "no-store",
-  });
+  const [globalData, feedData, { tags }] = await Promise.all([
+    articlesResponse.json(),
+    feedResponse.json(),
+    tagsResponse.json(),
+  ]);
 
-  const { articles: globalArticles, articlesCount: globalArticlesCount } =
-    await articlesResponse.json();
-
-  const { tags } = await tagsResponse.json();
-
-  const { articles: feedArticles, articlesCount: feedArticlesCount } =
-    await feedResponse.json();
-
-  const articles = params.tab === "personal" ? feedArticles : globalArticles;
   const articlesCount =
-    params.tab === "personal" ? feedArticlesCount : globalArticlesCount;
+    tab === "personal" ? feedData.articlesCount : globalData.articlesCount;
+
+  const fallback = {
+    [`/api/articles?${apiQueryString}`]: globalData,
+    [`/api/articles/feed?${apiQueryString}`]: feedData,
+  };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="bg-brand-primary dark:bg-gray-800 shadow-inner">
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="font-logo text-5xl md:text-6xl lg:text-7xl text-white mb-4 font-bold">
-            conduit
-          </h1>
-          <p className="text-white text-xl md:text-2xl font-light">
-            A place to share your knowledge.
-          </p>
-        </div>
-      </div>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="hidden lg:block lg:w-64"></div>
-          <div className="lg:hidden overflow-x-auto -mx-4 px-4">
-            <div className="flex space-x-2 whitespace-nowrap">
+    <SWRProvider fallback={fallback}>
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
+        <header className="bg-brand-primary dark:bg-gray-800 shadow-inner">
+          <div className="container mx-auto px-4 py-12 text-center">
+            <h1 className="font-logo text-5xl md:text-6xl lg:text-7xl text-white mb-4 font-bold">
+              conduit
+            </h1>
+            <p className="text-white text-xl md:text-2xl font-light">
+              A place to share your knowledge.
+            </p>
+          </div>
+        </header>
+
+        {/* 메인 콘텐츠 */}
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* 모바일 태그 선택 */}
+            <div className="lg:hidden overflow-x-auto -mx-4 px-4">
               <SelectTag tags={tags} />
             </div>
-          </div>
-          <div className="flex-1 max-w-3xl mx-auto w-full justify-center">
-            <FeedToggle
-              params={{ tab: params.tab, tag: params.tag }}
-              isLoggedIn={!!token}
-            />
-            <ArticleList articles={articles} />
-            <div className="mt-8">
-              <Pagination total={articlesCount} limit={10} />
+
+            {/* 사이드바 왼쪽 공간 */}
+            <div className="hidden lg:block lg:w-64"></div>
+
+            {/* 메인 콘텐츠 영역 */}
+            <div className="flex-1 max-w-3xl mx-auto w-full justify-center">
+              <FeedToggle params={{ tab, tag }} isLoggedIn={!!token} />
+              <ArticleList apiQueryString={apiQueryString} tab={tab} />
+              <div className="mt-8">
+                <Pagination total={articlesCount} limit={10} />
+              </div>
             </div>
+
+            {/* 사이드바 오른쪽 */}
+            <aside className="hidden lg:block lg:w-64">
+              <div className="lg:sticky lg:top-24">
+                <SelectTag tags={tags} />
+              </div>
+            </aside>
           </div>
-          <div className="hidden lg:block lg:w-64">
-            <div className="lg:sticky lg:top-24">
-              <SelectTag tags={tags} />
-            </div>
-          </div>
-        </div>
+        </main>
       </div>
-    </div>
+    </SWRProvider>
   );
 }

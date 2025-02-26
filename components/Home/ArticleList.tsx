@@ -1,34 +1,103 @@
+"use client";
+
 import Link from "next/link";
-import { ArticleType } from "../../types/articleTypes";
+import FavoriteButton from "../ui/FavoriteButton";
 import Avatar from "../ui/Avata/Avatar";
+import useSWR from "swr";
+import { ArticleInterfaceType, ArticleType } from "@/types/articleTypes";
+import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
 interface ArticleListProps {
-  articles: ArticleType[];
-  // favoriteArticle: (slug: string) => void;
-  // unfavoriteArticle: (slug: string) => void;
-  // isPending: boolean;
+  apiQueryString: string;
+  tab: string;
 }
 
-const ArticleList = ({
-  articles,
-}: // favoriteArticle,
-// unfavoriteArticle,
-// isPending,
-ArticleListProps) => {
+export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
+  const apiUrl =
+    tab === "personal"
+      ? `/api/articles/feed?${apiQueryString}`
+      : `/api/articles?${apiQueryString}`;
+
+  const { data, error, isLoading, mutate } = useSWR(apiUrl);
+  const { articles } = data;
+
+  if (error) {
+    throw Error("데이터를 불러오는데 실패했습니다.");
+  }
+
   if (articles.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-4">데이터가 없습니다.</div>
+      <p className="text-center text-gray-500 py-4" role="status">
+        데이터가 없습니다.
+      </p>
     );
   }
 
+  const handleFavorite = async (slug: string, favorited: boolean) => {
+    if (isLoading) return;
+
+    await mutate(
+      async (prevData: ArticleInterfaceType | undefined) => {
+        if (favorited) {
+          await unfavoriteArticle(slug);
+          return {
+            ...prevData,
+            articles: prevData?.articles.map((article) =>
+              article.slug === slug
+                ? { ...article, favoritesCount: article.favoritesCount - 1 }
+                : article
+            ),
+          };
+        } else {
+          await favoriteArticle(slug);
+          return {
+            ...prevData,
+            articles: prevData?.articles.map((article) =>
+              article.slug === slug
+                ? { ...article, favoritesCount: article.favoritesCount + 1 }
+                : article
+            ),
+          };
+        }
+      },
+      {
+        optimisticData: (prevData: ArticleInterfaceType | undefined) => {
+          if (favorited) {
+            return {
+              ...prevData,
+              articles: prevData?.articles.map((article) =>
+                article.slug === slug
+                  ? { ...article, favoritesCount: article.favoritesCount - 1 }
+                  : article
+              ),
+            };
+          } else {
+            return {
+              ...prevData,
+              articles: prevData?.articles.map((article) =>
+                article.slug === slug
+                  ? { ...article, favoritesCount: article.favoritesCount + 1 }
+                  : article
+              ),
+            };
+          }
+        },
+        rollbackOnError: true,
+      }
+    );
+  };
   return (
-    <section className="divide-y divide-gray-200 dark:divide-gray-700">
-      {articles.map((article) => (
+    <section
+      aria-label="게시글 목록"
+      className="divide-y divide-gray-200 dark:divide-gray-700"
+    >
+      {articles.map((article: ArticleType) => (
         <article key={article.slug} className="py-6">
           <header className="flex items-center mb-4">
             <Link
               href={`/profile/${article.author.username}`}
-              className=" flex-shrink-0"
+              className="flex-shrink-0"
+              aria-label={`${article.author.username}의 프로필로 이동`}
             >
               <Avatar
                 username={article.author.username || ""}
@@ -44,56 +113,51 @@ ArticleListProps) => {
               >
                 {article.author.username}
               </Link>
-              <time className="text-gray-500 dark:text-gray-400 text-sm">
-                {new Date(article.createdAt).toLocaleDateString()}
+              <time
+                dateTime={new Date(article.createdAt).toISOString()}
+                className="text-gray-500 dark:text-gray-400 text-sm"
+              >
+                {new Date(article.createdAt).toISOString().split("T")[0]}
               </time>
             </div>
-            <button
-              className={`ml-4 px-3 py-1 rounded-full text-sm flex items-center gap-1 transition-colors
-                ${
-                  article.favorited
-                    ? "bg-brand-primary text-white hover:bg-brand-secondary"
-                    : "border border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white"
-                }`}
-              type="button"
-              // disabled={isPending}
-              // onClick={() =>
-              //   article.favorited
-              //     ? unfavoriteArticle(article.slug)
-              //     : favoriteArticle(article.slug)
-              // }
-            >
-              <i className="ion-heart" aria-hidden="true"></i>
-              <span>{article.favoritesCount}</span>
-            </button>
+            <FavoriteButton
+              favorited={article.favorited}
+              favoritesCount={article.favoritesCount}
+              handleFavorite={handleFavorite}
+              slug={article.slug}
+            />
           </header>
-          <Link href={`/article/${article.slug}`} className="block group ">
-            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100 group-hover:text-brand-primary">
-              {article.title}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {article.description}
-            </p>
-            <footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap">
-              <span className="text-brand-primary text-sm mb-2 sm:mb-0">
-                Read more...
-              </span>
-              <ul className="flex flex-wrap gap-2" aria-label="태그 목록">
-                {article.tagList.map((tag) => (
-                  <li
-                    key={tag}
-                    className="px-2 py-1 text-xs rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
-                  >
-                    {tag}
-                  </li>
-                ))}
-              </ul>
-            </footer>
-          </Link>
+          <div className="article-content">
+            <Link
+              href={`/article/${article.slug}`}
+              className="block group"
+              aria-label={`${article.title} 게시글 읽기`}
+            >
+              <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100 group-hover:text-brand-primary">
+                {article.title}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                {article.description}
+              </p>
+              <footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap">
+                <span className="text-brand-primary text-sm mb-2 sm:mb-0">
+                  Read more...
+                </span>
+                <ul className="flex flex-wrap gap-2" aria-label="태그 목록">
+                  {article.tagList.map((tag) => (
+                    <li
+                      key={tag}
+                      className="px-2 py-1 text-xs rounded-full border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              </footer>
+            </Link>
+          </div>
         </article>
       ))}
     </section>
   );
-};
-
-export default ArticleList;
+}
