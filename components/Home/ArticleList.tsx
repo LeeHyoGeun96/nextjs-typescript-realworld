@@ -8,6 +8,8 @@ import { ArticleInterfaceType, ArticleType } from "@/types/articleTypes";
 import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
 import TagList from "../ui/tag/TagList";
+import { useUser } from "@/hooks/useUser";
+import { useRouter } from "next/navigation";
 
 interface ArticleListProps {
   apiQueryString: string;
@@ -22,6 +24,8 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
 
   const { data, error, isLoading, mutate } = useSWR(apiUrl);
   const { articles } = data;
+  const { isLoggedIn } = useUser();
+  const router = useRouter();
 
   if (error) {
     throw Error("데이터를 불러오는데 실패했습니다.");
@@ -37,6 +41,14 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
 
   const handleFavorite = async (slug: string, favorited: boolean) => {
     if (isLoading) return;
+    if (!isLoggedIn) {
+      const confirm = window.confirm(
+        "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
+      );
+      if (!confirm) return;
+      router.push("/login");
+      return;
+    }
 
     await mutate(
       async (prevData: ArticleInterfaceType | undefined) => {
