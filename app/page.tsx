@@ -92,7 +92,7 @@ export default async function HomePage({
             {/* 사이드바 오른쪽 */}
             <aside className="hidden lg:block lg:w-64">
               <div className="lg:sticky lg:top-24">
-                <SelectTag tags={tags} />
+                <SelectTag tags={tags} selectedTag={tag} />
               </div>
             </aside>
           </div>
