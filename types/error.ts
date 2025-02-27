@@ -33,6 +33,13 @@ export function createDisplayError(
     };
   }
 
+  if (typeof error === "string") {
+    return {
+      message: error,
+      name: "DisplayError",
+    };
+  }
+
   if (isServerError(error)) {
     return {
       message: JSON.stringify(formatError(error), null, 2),

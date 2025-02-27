@@ -36,6 +36,10 @@ export interface CommentType {
   author: AuthorType;
 }
 
+export interface CommentsResponse {
+  comments: CommentType[];
+}
+
 export interface ArticleFormType {
   title: string;
   description: string;

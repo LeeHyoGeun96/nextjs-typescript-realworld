@@ -2,11 +2,13 @@ import FeedToggle from "@/components/Home/FeedToggle";
 import ArticleList from "@/components/Home/ArticleList";
 import { Pagination } from "@/components/Home/Pagination";
 import SelectTag from "@/components/ui/tag/SelectTag";
-import ArticlesSWRProvider from "@/lib/swr/ArticlesSWRProvider";
+
 import { SearchParams } from "@/types/global";
 import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { parseQueryParams } from "@/utils/parseQueryParams";
 import { cookies } from "next/headers";
+import SWRProvider from "@/lib/swr/SWRProvider";
+import { ArticleType } from "@/types/articleTypes";
 
 export default async function HomePage({
   searchParams,
@@ -46,8 +48,15 @@ export default async function HomePage({
     [`/api/articles/feed?${apiQueryString}`]: feedData,
   };
 
+  type ArticleListFallback = {
+    globalArticles?: ArticleType[];
+    globalArticlesCount?: number;
+    feedArticles?: ArticleType[];
+    feedArticlesCount?: number;
+  };
+
   return (
-    <ArticlesSWRProvider fallback={fallback}>
+    <SWRProvider<ArticleListFallback> fallback={fallback}>
       <div className="min-h-screen bg-white dark:bg-gray-900">
         {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
         <header className="bg-brand-primary dark:bg-gray-800 shadow-inner">
@@ -90,6 +99,6 @@ export default async function HomePage({
           </div>
         </main>
       </div>
-    </ArticlesSWRProvider>
+    </SWRProvider>
   );
 }
