@@ -9,6 +9,7 @@ interface TagListProps {
   selectedTag?: string;
   showDeleteButton?: boolean;
   className?: string;
+  readOnly?: boolean;
 }
 
 const TagList = memo(
@@ -17,12 +18,14 @@ const TagList = memo(
     selectedTag,
     showDeleteButton = true,
     className = "",
+    readOnly = false,
   }: TagListProps) => {
     const router = useRouter();
 
     const handleTagClick = useCallback(
       (e: React.MouseEvent, tag: string) => {
         // 이벤트 버블링 방지
+        if (readOnly) return;
         e.preventDefault();
         e.stopPropagation();
 
@@ -30,12 +33,13 @@ const TagList = memo(
         current.set("tag", tag);
         router.push(`/?${current.toString()}`);
       },
-      [router]
+      [router, readOnly]
     );
 
     const handleDeleteTag = useCallback(
       (e: React.MouseEvent) => {
         // 이벤트 버블링 방지
+        if (readOnly) return;
         e.preventDefault();
         e.stopPropagation();
 
@@ -44,7 +48,7 @@ const TagList = memo(
         current.delete("tag");
         router.push(`?${current.toString()}`);
       },
-      [router, selectedTag]
+      [router, selectedTag, readOnly]
     );
 
     if (tags.length === 0) {
@@ -57,12 +61,15 @@ const TagList = memo(
           <li key={tag}>
             <button
               type="button"
+              disabled={readOnly}
               className={`
               inline-block px-2 py-1 text-sm
               rounded-full transition-colors
               whitespace-nowrap
               ${
-                selectedTag === tag
+                readOnly
+                  ? "cursor-default text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700"
+                  : selectedTag === tag
                   ? "bg-green-500 text-white"
                   : "text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
               }

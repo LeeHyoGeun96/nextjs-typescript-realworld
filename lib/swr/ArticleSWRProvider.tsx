@@ -12,7 +12,7 @@ type ArticlesFallback = {
   };
 };
 
-export default function SWRProvider({
+export default function ArticleSWRProvider({
   children,
   fallback,
 }: {

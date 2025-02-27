@@ -1,9 +1,10 @@
-import FeedToggle from "@/components/FeedToggle";
+import FeedToggle from "@/components/Home/FeedToggle";
 import ArticleList from "@/components/Home/ArticleList";
 import { Pagination } from "@/components/Home/Pagination";
 import SelectTag from "@/components/ui/tag/SelectTag";
-import SWRProvider from "@/lib/swr/SWRProvider";
+import ArticlesSWRProvider from "@/lib/swr/ArticlesSWRProvider";
 import { SearchParams } from "@/types/global";
+import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { parseQueryParams } from "@/utils/parseQueryParams";
 import { cookies } from "next/headers";
 
@@ -14,36 +15,27 @@ export default async function HomePage({
 }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
+  const headers = optionalAuthHeaders(token);
 
   const { apiQueryString, tab, tag } = await parseQueryParams(searchParams);
 
   // API 요청을 병렬로 실행
-  const [articlesResponse, feedResponse, tagsResponse] = await Promise.all([
+  const [globalData, feedData, { tags }] = await Promise.all([
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles?${apiQueryString}`, {
       headers,
       cache: "no-store",
-    }),
+    }).then((res) => res.json()),
     fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/articles/feed?${apiQueryString}`,
       {
         headers,
         cache: "no-store",
       }
-    ),
+    ).then((res) => res.json()),
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/tags`, {
       headers,
       cache: "no-store",
-    }),
-  ]);
-
-  const [globalData, feedData, { tags }] = await Promise.all([
-    articlesResponse.json(),
-    feedResponse.json(),
-    tagsResponse.json(),
+    }).then((res) => res.json()),
   ]);
 
   const articlesCount =
@@ -55,7 +47,7 @@ export default async function HomePage({
   };
 
   return (
-    <SWRProvider fallback={fallback}>
+    <ArticlesSWRProvider fallback={fallback}>
       <div className="min-h-screen bg-white dark:bg-gray-900">
         {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
         <header className="bg-brand-primary dark:bg-gray-800 shadow-inner">
@@ -98,6 +90,6 @@ export default async function HomePage({
           </div>
         </main>
       </div>
-    </SWRProvider>
+    </ArticlesSWRProvider>
   );
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import FavoriteButton from "../ui/FavoriteButton";
 import Avatar from "../ui/Avata/Avatar";
 import useSWR from "swr";
-import { ArticleInterfaceType, ArticleType } from "@/types/articleTypes";
+import { ArticlesInterface, ArticleType } from "@/types/articleTypes";
 import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
 import TagList from "../ui/tag/TagList";
@@ -51,7 +51,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
     }
 
     await mutate(
-      async (prevData: ArticleInterfaceType | undefined) => {
+      async (prevData: ArticlesInterface | undefined) => {
         if (favorited) {
           await unfavoriteArticle(slug);
           return {
@@ -75,13 +75,18 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
         }
       },
       {
-        optimisticData: (prevData: ArticleInterfaceType | undefined) => {
+        optimisticData: (prevData: ArticlesInterface | undefined) => {
+          if (!prevData) return prevData;
           if (favorited) {
             return {
               ...prevData,
               articles: prevData?.articles.map((article) =>
                 article.slug === slug
-                  ? { ...article, favoritesCount: article.favoritesCount - 1 }
+                  ? {
+                      ...article,
+                      favoritesCount: article.favoritesCount - 1,
+                      favorited: !favorited,
+                    }
                   : article
               ),
             };
@@ -90,7 +95,11 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
               ...prevData,
               articles: prevData?.articles.map((article) =>
                 article.slug === slug
-                  ? { ...article, favoritesCount: article.favoritesCount + 1 }
+                  ? {
+                      ...article,
+                      favoritesCount: article.favoritesCount + 1,
+                      favorited: !favorited,
+                    }
                   : article
               ),
             };

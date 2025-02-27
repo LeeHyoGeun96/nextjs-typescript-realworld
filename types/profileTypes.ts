@@ -1,5 +1,16 @@
 // 도메인 타입
-import {ProfileType} from './global';
+
+export interface ProfileType {
+  username: string;
+  bio: string | null;
+  image: string | null;
+  following: boolean;
+  isMe: boolean;
+}
+
+export interface ProfileResponse {
+  profile: ProfileType;
+}
 
 // API 요청 파라미터 타입들
 export interface GetProfileRequestParams {

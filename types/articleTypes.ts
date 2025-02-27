@@ -19,7 +19,11 @@ export interface ArticleType {
   author: AuthorType;
 }
 
-export interface ArticleInterfaceType {
+export interface ArticleResponse {
+  article: ArticleType;
+}
+
+export interface ArticlesResponse {
   articles: ArticleType[];
   articlesCount: number;
 }
