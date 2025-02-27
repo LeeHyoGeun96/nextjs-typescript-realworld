@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/Button/Button";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { updatePassword } from "@/actions/auth";
 import { UpdatePasswordState } from "@/types/authTypes";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { InputWithError } from "../InputWithError";
-import { isDisplayError, ValidationError } from "@/types/error";
+import { isUnexpectedError, ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
 import { useRouter } from "next/navigation";
 import logout from "@/utils/auth/authUtils";
@@ -32,12 +32,7 @@ export default function SecurityForm() {
   );
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
-  const [displayError, setDisplayError] = useState<string | undefined>(
-    undefined
-  );
-  const [unexpectedError, setUnexpectedError] = useState<string | undefined>(
-    undefined
-  );
+
   const [isValid, setIsValid] = useState(false);
   const router = useRouter();
 
@@ -68,18 +63,8 @@ export default function SecurityForm() {
     });
   };
 
-  useEffect(() => {
-    if (state.error) {
-      if (isDisplayError(state.error)) {
-        setDisplayError(state.error.message);
-      } else {
-        setUnexpectedError(state.error.message);
-      }
-    }
-  }, [state.error]);
-
-  if (unexpectedError) {
-    throw new Error(unexpectedError);
+  if (state.error && isUnexpectedError(state.error)) {
+    throw state.error;
   }
 
   return (
@@ -89,7 +74,7 @@ export default function SecurityForm() {
           비밀번호 변경
         </h3>
         <form action={formAction} onSubmit={handleSubmit}>
-          <ErrorDisplay message={displayError} />
+          <ErrorDisplay message={state.error?.message} />
 
           <InputWithError
             props={{
