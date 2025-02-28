@@ -60,7 +60,12 @@ export default function CommentsContainer({ slug, keys }: CommentsProps) {
     await mutate(
       async (prevData) => {
         const commentResponse = await addComment(commentText, slug);
-        const comment = commentResponse.comment;
+        const comment = commentResponse.value?.responseData?.comment;
+        if (!comment) {
+          throw new Error(
+            commentResponse.error?.message || "댓글 추가에 실패했습니다."
+          );
+        }
         return {
           comments: [comment, ...(prevData?.comments || [])],
         };

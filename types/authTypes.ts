@@ -1,56 +1,37 @@
-import { ApiError } from "./error";
+import { ActionState } from "./global";
 
 export type ValidationMessages = Record<string, string>;
 
-export interface SignupState {
-  error?: ApiError;
-  value: {
-    inputData: {
-      email: string;
-      username: string;
-      password: string;
-      passwordConfirm: string;
-    };
+export type SignupState = ActionState<{
+  inputData: {
+    email: string;
+    username: string;
+    password: string;
+    passwordConfirm: string;
   };
-  success?: boolean;
-}
+}>;
 
-export interface LoginState {
-  error?: ApiError;
-  value: {
-    inputData: {
-      email: string;
-      password: string;
-    };
-    token?: string;
+export type LoginState = ActionState<{
+  inputData: {
+    email: string;
+    password: string;
   };
-  success?: boolean;
-}
+}>;
 
-export interface UpdatePasswordState {
-  success?: boolean;
-  error?: ApiError;
-  value: {
-    inputData: {
-      currentPassword: string;
-      password: string;
-      passwordConfirm: string;
-    };
-    token?: string | null;
+export type UpdatePasswordState = ActionState<{
+  inputData: {
+    currentPassword: string;
+    password: string;
+    passwordConfirm: string;
   };
-}
+}>;
 
-export interface UpdateProfileState {
-  success?: boolean;
-  error?: ApiError;
-  value: {
-    inputData: {
-      username?: string;
-      bio?: string;
-    };
-    token?: string | null;
+export type UpdateProfileState = ActionState<{
+  inputData: {
+    username: string;
+    bio?: string;
   };
-}
+}>;
 
 export interface CurrentUserType {
   id: string;

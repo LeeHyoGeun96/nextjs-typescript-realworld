@@ -7,7 +7,7 @@ import { updatePassword } from "@/actions/auth";
 import { UpdatePasswordState } from "@/types/authTypes";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { InputWithError } from "../InputWithError";
-import { isUnexpectedError, ValidationError } from "@/types/error";
+import { ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
 import { useRouter } from "next/navigation";
 import logout from "@/utils/auth/authUtils";
@@ -20,9 +20,8 @@ const initialState: UpdatePasswordState = {
       password: "",
       passwordConfirm: "",
     },
-    token: null,
   },
-  success: undefined,
+  success: false,
 };
 
 export default function SecurityForm() {
@@ -63,10 +62,6 @@ export default function SecurityForm() {
     });
   };
 
-  if (state.error && isUnexpectedError(state.error)) {
-    throw state.error;
-  }
-
   return (
     <div className="flex gap-8 flex-col">
       <section>
@@ -81,7 +76,7 @@ export default function SecurityForm() {
               type: "password",
               name: "currentPassword",
               placeholder: "기존 비밀번호",
-              defaultValue: state.value.inputData.currentPassword,
+              defaultValue: state.value?.inputData.currentPassword,
               onChange: handleChange,
             }}
             className="mb-4"
@@ -97,7 +92,7 @@ export default function SecurityForm() {
               type: "password",
               name: "password",
               placeholder: "새로운 비밀번호",
-              defaultValue: state.value.inputData.password,
+              defaultValue: state.value?.inputData.password,
               onChange: handleChange,
             }}
             className="mb-4"
@@ -113,7 +108,7 @@ export default function SecurityForm() {
               type: "password",
               name: "passwordConfirm",
               placeholder: "새로운 비밀번호 확인",
-              defaultValue: state.value.inputData.passwordConfirm,
+              defaultValue: state.value?.inputData.passwordConfirm,
               onChange: handleChange,
             }}
             className="mb-4"

@@ -11,7 +11,7 @@ import { useUser } from "@/hooks/useUser";
 export default function SettingForm() {
   const [state, formAction] = useActionState(updateProfile, {
     success: false,
-    error: undefined,
+    error: null,
     value: { inputData: { username: "", bio: "" } },
   });
 

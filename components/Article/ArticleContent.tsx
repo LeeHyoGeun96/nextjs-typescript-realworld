@@ -17,7 +17,6 @@ import {
 import TagList from "../ui/tag/TagList";
 import { followUser, unfollowUser } from "@/actions/profile";
 import { useState } from "react";
-import Error from "next/error";
 import { isDisplayError } from "@/types/error";
 import { useUser } from "@/hooks/useUser";
 
@@ -138,10 +137,20 @@ export default function ArticleContent({ keys }: ArticleProps) {
         if (!prevData) return profileResponse;
         if (following) {
           const response = await unfollowUser(username);
-          return response;
+          if (response.error) {
+            throw new Error(
+              response.error?.message || "언팔로우 처리에 실패했습니다."
+            );
+          }
+          return response.value?.responseData;
         } else {
           const response = await followUser(username);
-          return response;
+          if (response.error) {
+            throw new Error(
+              response.error?.message || "팔로우 처리에 실패했습니다."
+            );
+          }
+          return response.value?.responseData;
         }
       },
       {

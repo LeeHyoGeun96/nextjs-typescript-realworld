@@ -1,5 +1,3 @@
-import formatError from "@/error/convertUserErrorToKorean";
-
 export interface ValidationError extends Error {
   name: "ValidationError";
   fieldErrors: Record<string, string>;
@@ -9,16 +7,7 @@ export interface DisplayError {
   name: "DisplayError";
   errorCode?: number;
   message: string;
-}
-
-type ServerError = Record<string, string[]> | undefined;
-
-function isServerError(error: unknown): error is ServerError {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    Object.values(error as object).every(Array.isArray)
-  );
+  cause?: Error;
 }
 
 export function createDisplayError(
@@ -27,9 +16,10 @@ export function createDisplayError(
 ): DisplayError {
   if (error instanceof Error) {
     return {
-      message: error.message,
       name: "DisplayError",
+      message: error.message,
       errorCode: code,
+      cause: error, // 원본 에러 저장
     };
   }
 
@@ -37,14 +27,6 @@ export function createDisplayError(
     return {
       message: error,
       name: "DisplayError",
-    };
-  }
-
-  if (isServerError(error)) {
-    return {
-      message: JSON.stringify(formatError(error), null, 2),
-      name: "DisplayError",
-      errorCode: code,
     };
   }
 
@@ -76,31 +58,7 @@ export function isDisplayError(error: unknown): error is DisplayError {
   );
 }
 
-export interface UnexpectedError extends Error {
-  name: "UnexpectedError";
-  message: string;
-}
-
-export function isUnexpectedError(error: unknown): error is UnexpectedError {
-  return (
-    error !== null &&
-    typeof error === "object" &&
-    "name" in error &&
-    error.name === "UnexpectedError"
-  );
-}
-
-export type ApiError = Error | ValidationError | DisplayError | UnexpectedError;
-
-export function isApiError(error: unknown): error is ApiError {
-  return (
-    isValidationError(error) ||
-    isDisplayError(error) ||
-    isUnexpectedError(error)
-  );
-}
+export type ApiError = Error | ValidationError | DisplayError;
 
 // 개별 에러 메시지 타입
 export type ErrorMessage = string[];
-
-// 에러 객체 타입

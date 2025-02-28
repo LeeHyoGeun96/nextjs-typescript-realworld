@@ -1,79 +1,116 @@
 "use server";
 
 import { translateError } from "@/error/translateError";
-import { createArticleState, updateArticleState } from "@/types/articleTypes";
-import { createDisplayError } from "@/types/error";
+import {
+  addCommentState,
+  createArticleState,
+  deleteArticleState,
+  deleteCommentState,
+  favoriteArticleState,
+  updateArticleState,
+} from "@/types/articleTypes";
 import { cookies } from "next/headers";
 
-export const favoriteArticle = async (slug: string) => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-
-  if (!token) {
-    throw createDisplayError("로그인이 필요합니다.");
-  }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/favorite`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-  if (!response.ok) {
-    const errorMessage =
-      translateError(data.errors) || "좋아요 처리에 실패했습니다.";
-    throw createDisplayError(errorMessage);
-  }
-
-  return data;
-};
-
-export const unfavoriteArticle = async (slug: string) => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-
-  if (!token) {
-    throw createDisplayError("로그인이 필요합니다.");
-  }
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/favorite`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  const data = await response.json();
-  if (!response.ok) {
-    const errorMessage =
-      translateError(data.errors) || "좋아요 처리에 실패했습니다.";
-    throw createDisplayError(errorMessage);
-  }
-
-  return data;
-};
-
-export const addComment = async (body: string, slug: string) => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
-
-  if (!token) {
-    throw createDisplayError("로그인이 필요합니다.");
-  }
-
-  if (!body.trim()) {
-    throw createDisplayError("댓글을 입력해주세요.");
-  }
-
+export const favoriteArticle = async (
+  slug: string
+): Promise<favoriteArticleState> => {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      throw new Error("인증되지 않은 접근입니다.");
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/favorite`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(data);
+      const errorMessage =
+        translateError(data.errors) || "좋아요 처리에 실패했습니다.";
+      return {
+        success: false,
+        error: new Error(errorMessage),
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("좋아요 처리중에 예상치 못한 에러가 발생하였습니다.");
+  }
+};
+
+export const unfavoriteArticle = async (
+  slug: string
+): Promise<favoriteArticleState> => {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      throw new Error("인증되지 않은 접근입니다.");
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/favorite`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      const errorMessage =
+        translateError(data.errors) || "좋아요 처리에 실패했습니다.";
+      return {
+        success: false,
+        error: new Error(errorMessage),
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error("좋아요 처리중에 예상치 못한 에러가 발생하였습니다.");
+  }
+};
+
+export const addComment = async (
+  body: string,
+  slug: string
+): Promise<addCommentState> => {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      throw new Error("인증되지 않은 접근입니다.");
+    }
+
+    if (!body.trim()) {
+      return {
+        success: false,
+        error: new Error("댓글을 입력해주세요."),
+      };
+    }
+
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/comments`,
       {
@@ -93,23 +130,34 @@ export const addComment = async (body: string, slug: string) => {
     if (!response.ok) {
       const errorMessage =
         translateError(data.errors) || "댓글 작성에 실패했습니다.";
-      throw createDisplayError(errorMessage);
+      return {
+        success: false,
+        error: new Error(errorMessage),
+      };
     }
 
-    return data;
+    return {
+      success: true,
+      value: {
+        responseData: data,
+      },
+    };
   } catch (error) {
     console.error(error);
     throw new Error("댓글 작성중에 예상치 못한 에러가 발생하였습니다.");
   }
 };
 
-export const deleteComment = async (id: number, slug: string) => {
+export const deleteComment = async (
+  id: number,
+  slug: string
+): Promise<deleteCommentState> => {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      throw createDisplayError("로그인이 필요합니다.");
+      throw new Error("인증되지 않은 접근입니다.");
     }
 
     const response = await fetch(
@@ -122,25 +170,36 @@ export const deleteComment = async (id: number, slug: string) => {
       }
     );
 
+    const data = await response.json();
+
     if (!response.ok) {
       console.error(response);
-      throw createDisplayError("댓글 삭제에 실패했습니다.");
+      const errorMessage =
+        translateError(data.errors) || "댓글 삭제에 실패했습니다.";
+      return {
+        success: false,
+        error: new Error(errorMessage),
+      };
     }
+
+    return {
+      success: true,
+    };
   } catch (e) {
     console.error(e);
-    throw createDisplayError(
-      "댓글 삭제중에 예상치 못한 에러가 발생하였습니다."
-    );
+    throw new Error("댓글 삭제중에 예상치 못한 에러가 발생하였습니다.");
   }
 };
 
-export const deleteArticle = async (slug: string) => {
+export const deleteArticle = async (
+  slug: string
+): Promise<deleteArticleState> => {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      throw createDisplayError("로그인이 필요합니다.");
+      throw new Error("인증되지 않은 접근입니다.");
     }
 
     const response = await fetch(
@@ -158,10 +217,15 @@ export const deleteArticle = async (slug: string) => {
       const data = await response.json();
       const errorMessage =
         translateError(data.errors) || "게시글 삭제에 실패했습니다.";
-      throw createDisplayError(errorMessage);
+      return {
+        success: false,
+        error: new Error(errorMessage),
+      };
     }
 
-    return true;
+    return {
+      success: true,
+    };
   } catch (e) {
     console.error(e);
     throw new Error("게시글 삭제중에 예상치 못한 에러가 발생하였습니다.");
@@ -179,7 +243,7 @@ export const createArticle = async (
     if (!token) {
       return {
         success: false,
-        error: createDisplayError("로그인이 필요합니다."),
+        error: new Error("로그인이 필요합니다."),
       };
     }
 
@@ -196,7 +260,7 @@ export const createArticle = async (
     if (!inputData.title || !inputData.description || !inputData.body) {
       return {
         success: false,
-        error: createDisplayError("모든 필드를 입력해주세요."),
+        error: new Error("모든 필드를 입력해주세요."),
         value: { inputData },
       };
     }
@@ -222,7 +286,7 @@ export const createArticle = async (
         translateError(data.errors) || "게시글 작성에 실패했습니다.";
       return {
         success: false,
-        error: createDisplayError(errorMessage),
+        error: new Error(errorMessage),
         value: { inputData },
       };
     }
@@ -249,7 +313,7 @@ export const updateArticle = async (
     if (!token) {
       return {
         success: false,
-        error: createDisplayError("로그인이 필요합니다."),
+        error: new Error("로그인이 필요합니다."),
         value: {
           inputData: {
             title: "",
@@ -274,7 +338,7 @@ export const updateArticle = async (
     if (!inputData.title || !inputData.description || !inputData.body) {
       return {
         success: false,
-        error: createDisplayError("모든 필드를 입력해주세요."),
+        error: new Error("모든 필드를 입력해주세요."),
         value: { inputData },
       };
     }
@@ -300,7 +364,7 @@ export const updateArticle = async (
         translateError(data.errors) || "게시글 수정에 실패했습니다.";
       return {
         success: false,
-        error: createDisplayError(errorMessage),
+        error: new Error(errorMessage),
         value: { inputData },
       };
     }

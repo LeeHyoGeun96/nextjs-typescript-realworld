@@ -1,4 +1,4 @@
-import { ApiError } from "./error";
+import { ActionState } from "./global";
 
 // 도메인 타입들
 export interface AuthorType {
@@ -42,20 +42,30 @@ export interface CommentsResponse {
   comments: CommentType[];
 }
 
-export interface createArticleState {
-  success: boolean;
-  error?: ApiError | null;
-  value?: {
-    inputData: {
-      title: string;
-      description: string;
-      body: string;
-      tagList: string[];
-    };
-  };
+export interface CommentResponse {
+  comment: CommentType;
 }
 
+export type createArticleState = ActionState<{
+  inputData: {
+    title: string;
+    description: string;
+    body: string;
+    tagList: string[];
+  };
+}>;
+
 export type updateArticleState = createArticleState;
+
+export type favoriteArticleState = ActionState<never>;
+
+export type addCommentState = ActionState<{
+  responseData: CommentResponse;
+}>;
+
+export type deleteCommentState = ActionState<never>;
+
+export type deleteArticleState = ActionState<never>;
 
 export interface ArticleFormType {
   title: string;
