@@ -74,7 +74,7 @@ export async function signUp(
       },
     };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return {
       success: false,
       error: { name: "UnexpectedError", message: (error as Error).message },

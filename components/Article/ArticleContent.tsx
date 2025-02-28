@@ -231,7 +231,7 @@ export default function ArticleContent({ keys }: ArticleProps) {
                 </Link>
                 <time
                   className="text-gray-500 text-sm block"
-                  dateTime={articleData?.createdAt.toString() || ""}
+                  dateTime={articleData?.createdAt?.toString() || ""}
                 >
                   {new Date(articleData?.createdAt || "").toLocaleDateString(
                     "ko-KR"
@@ -262,7 +262,11 @@ export default function ArticleContent({ keys }: ArticleProps) {
           </div>
 
           <div className="mt-4">
-            <TagList tags={articleData?.tagList} showDeleteButton={false} />
+            <TagList
+              tags={articleData?.tagList}
+              showUnfilterButton={false}
+              mode="filter"
+            />
           </div>
         </section>
 

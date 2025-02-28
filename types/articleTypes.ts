@@ -1,3 +1,5 @@
+import { ApiError } from "./error";
+
 // 도메인 타입들
 export interface AuthorType {
   username: string;
@@ -39,6 +41,21 @@ export interface CommentType {
 export interface CommentsResponse {
   comments: CommentType[];
 }
+
+export interface createArticleState {
+  success: boolean;
+  error?: ApiError | null;
+  value?: {
+    inputData: {
+      title: string;
+      description: string;
+      body: string;
+      tagList: string[];
+    };
+  };
+}
+
+export type updateArticleState = createArticleState;
 
 export interface ArticleFormType {
   title: string;

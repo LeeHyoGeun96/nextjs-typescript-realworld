@@ -22,7 +22,7 @@ export const followUser = async (username: string) => {
 
   if (!response.ok) {
     const error = await response.json();
-    console.log(error);
+    console.error(error);
     throw new Error("팔로우 처리에 실패했습니다.");
   }
 
@@ -51,7 +51,7 @@ export const unfollowUser = async (username: string) => {
 
   if (!response.ok) {
     const error = await response.json();
-    console.log(error);
+    console.error(error);
     throw new Error("언팔로우 처리에 실패했습니다.");
   }
 

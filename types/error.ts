@@ -64,6 +64,10 @@ export function isValidationError(error: unknown): error is ValidationError {
 }
 
 export function isDisplayError(error: unknown): error is DisplayError {
+  if (error === undefined) {
+    return false;
+  }
+
   return (
     error !== null &&
     typeof error === "object" &&
@@ -86,7 +90,7 @@ export function isUnexpectedError(error: unknown): error is UnexpectedError {
   );
 }
 
-export type ApiError = ValidationError | DisplayError | UnexpectedError;
+export type ApiError = Error | ValidationError | DisplayError | UnexpectedError;
 
 export function isApiError(error: unknown): error is ApiError {
   return (

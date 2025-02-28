@@ -4,7 +4,7 @@ import Link from "next/link";
 import FavoriteButton from "../ui/FavoriteButton";
 import Avatar from "../ui/Avata/Avatar";
 import useSWR from "swr";
-import { ArticlesInterface, ArticleType } from "@/types/articleTypes";
+import { ArticlesResponse, ArticleType } from "@/types/articleTypes";
 import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
 import TagList from "../ui/tag/TagList";
@@ -51,7 +51,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
     }
 
     await mutate(
-      async (prevData: ArticlesInterface | undefined) => {
+      async (prevData: ArticlesResponse | undefined) => {
         if (favorited) {
           await unfavoriteArticle(slug);
           return {
@@ -75,7 +75,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
         }
       },
       {
-        optimisticData: (prevData: ArticlesInterface | undefined) => {
+        optimisticData: (prevData: ArticlesResponse | undefined) => {
           if (!prevData) return prevData;
           if (favorited) {
             return {
@@ -170,7 +170,8 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
                 {article.tagList.length > 0 && (
                   <TagList
                     tags={article.tagList}
-                    showDeleteButton={false}
+                    mode="filter"
+                    showUnfilterButton={false}
                     className="flex-wrap"
                   />
                 )}
