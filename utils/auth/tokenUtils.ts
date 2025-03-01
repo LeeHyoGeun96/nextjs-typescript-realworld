@@ -53,6 +53,5 @@ export async function setAuthToken(token: string): Promise<void> {
  * 인증 토큰 제거 함수
  */
 export async function removeAuthToken(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete("token");
+  (await cookies()).delete("token");
 }
