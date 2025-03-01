@@ -1,10 +1,10 @@
 "use server";
 
-import { COOKIE_OPTIONS } from "@/constant/auth";
 import { translateError } from "@/error/translateError";
 import { deleteAvatarState, updateAvatarState } from "@/types/profileTypes";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { setAuthToken } from "../utils/auth/tokenUtils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -79,7 +79,7 @@ export async function updateAvatar(
       throw new Error(message);
     }
 
-    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
+    await setAuthToken(responseData.user.token);
 
     return {
       success: true,
@@ -145,7 +145,7 @@ export async function deleteAvatar(userId: string): Promise<deleteAvatarState> {
       }
     }
 
-    cookieStore.set("token", responseData.token, COOKIE_OPTIONS);
+    await setAuthToken(responseData.user.token);
 
     return { success: true };
   } catch (error) {

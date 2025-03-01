@@ -8,10 +8,10 @@ import {
 } from "@/types/authTypes";
 import { ValidationError } from "@/types/error";
 import { cookies } from "next/headers";
-import { COOKIE_OPTIONS } from "@/constant/auth";
 
 import { validatePassword, validateSignup } from "@/utils/validations";
 import { translateError } from "@/error/translateError";
+import { setAuthToken } from "@/utils/auth/tokenUtils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -129,8 +129,7 @@ export async function login(
       };
     }
 
-    const cookieStore = await cookies();
-    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
+    await setAuthToken(responseData.user.token);
 
     return {
       success: true,
@@ -213,7 +212,7 @@ export async function updatePassword(
       };
     }
 
-    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
+    await setAuthToken(responseData.user.token);
 
     return {
       success: true,
@@ -279,8 +278,7 @@ export async function updateProfile(
       };
     }
 
-    cookieStore.set("token", responseData.user.token, COOKIE_OPTIONS);
-
+    await setAuthToken(responseData.user.token);
     return {
       success: true,
       value: { inputData },
