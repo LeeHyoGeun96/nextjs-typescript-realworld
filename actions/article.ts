@@ -170,10 +170,8 @@ export const deleteComment = async (
       }
     );
 
-    const data = await response.json();
-
     if (!response.ok) {
-      console.error(response);
+      const data = await response.json();
       const errorMessage =
         translateError(data.errors) || "댓글 삭제에 실패했습니다.";
       return {

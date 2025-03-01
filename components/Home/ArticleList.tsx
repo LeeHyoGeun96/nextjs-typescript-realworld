@@ -10,6 +10,11 @@ import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 import TagList from "../ui/tag/TagList";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
+import {
+  handleApiError,
+  handleUnexpectedError,
+} from "@/utils/error/errorHandle";
+import { useState } from "react";
 
 interface ArticleListProps {
   apiQueryString: string;
@@ -26,6 +31,11 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
   const { articles } = data;
   const { isLoggedIn } = useUser();
   const router = useRouter();
+  const [unExpectedError, setUnExpectedError] = useState("");
+
+  if (unExpectedError) {
+    throw new Error(unExpectedError);
+  }
 
   if (error) {
     throw Error("데이터를 불러오는데 실패했습니다.");
@@ -53,25 +63,43 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
     await mutate(
       async (prevData: ArticlesResponse | undefined) => {
         if (favorited) {
-          await unfavoriteArticle(slug);
-          return {
-            ...prevData,
-            articles: prevData?.articles.map((article) =>
-              article.slug === slug
-                ? { ...article, favoritesCount: article.favoritesCount - 1 }
-                : article
-            ),
-          };
+          try {
+            const unfavoriteResponse = await unfavoriteArticle(slug);
+            handleApiError(unfavoriteResponse, "언팔로우 처리에 실패했습니다.");
+            return {
+              ...prevData,
+              articles: prevData?.articles.map((article) =>
+                article.slug === slug
+                  ? {
+                      ...article,
+                      favoritesCount: article.favoritesCount - 1,
+                      favorited: false,
+                    }
+                  : article
+              ),
+            };
+          } catch (error) {
+            handleUnexpectedError(error, "언팔로우 처리", setUnExpectedError);
+          }
         } else {
-          await favoriteArticle(slug);
-          return {
-            ...prevData,
-            articles: prevData?.articles.map((article) =>
-              article.slug === slug
-                ? { ...article, favoritesCount: article.favoritesCount + 1 }
-                : article
-            ),
-          };
+          try {
+            const favoriteResponse = await favoriteArticle(slug);
+            handleApiError(favoriteResponse, "팔로우 처리에 실패했습니다.");
+            return {
+              ...prevData,
+              articles: prevData?.articles.map((article) =>
+                article.slug === slug
+                  ? {
+                      ...article,
+                      favoritesCount: article.favoritesCount + 1,
+                      favorited: true,
+                    }
+                  : article
+              ),
+            };
+          } catch (error) {
+            handleUnexpectedError(error, "팔로우 처리", setUnExpectedError);
+          }
         }
       },
       {
@@ -85,7 +113,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
                   ? {
                       ...article,
                       favoritesCount: article.favoritesCount - 1,
-                      favorited: !favorited,
+                      favorited: false,
                     }
                   : article
               ),
@@ -98,7 +126,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
                   ? {
                       ...article,
                       favoritesCount: article.favoritesCount + 1,
-                      favorited: !favorited,
+                      favorited: true,
                     }
                   : article
               ),
@@ -106,6 +134,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
           }
         },
         rollbackOnError: true,
+        revalidate: false,
       }
     );
   };

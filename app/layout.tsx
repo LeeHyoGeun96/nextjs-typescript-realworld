@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/ui/Header/Header";
 import { Roboto } from "next/font/google";
+import ToastProvider from "@/lib/sonner/ToastProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,6 +26,7 @@ export default async function RootLayout({
       <body>
         <Header />
         {children}
+        <ToastProvider />
       </body>
     </html>
   );

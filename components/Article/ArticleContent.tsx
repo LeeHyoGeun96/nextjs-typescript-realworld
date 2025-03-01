@@ -16,9 +16,13 @@ import {
 } from "@/actions/article";
 import TagList from "../ui/tag/TagList";
 import { followUser, unfollowUser } from "@/actions/profile";
-import { useState } from "react";
-import { isDisplayError } from "@/types/error";
 import { useUser } from "@/hooks/useUser";
+import { useState } from "react";
+
+import {
+  handleApiError,
+  handleUnexpectedError,
+} from "@/utils/error/errorHandle";
 
 export type ArticleKeys = {
   article: string;
@@ -44,7 +48,7 @@ export default function ArticleContent({ keys }: ArticleProps) {
     isLoading: isProfileLoading,
   } = useSWR<ProfileResponse>(keys.profile);
   const router = useRouter();
-  const [error, setError] = useState<Error | null>(null);
+  const [unExpectedError, setUnExpectedError] = useState<string | null>(null);
 
   if (!articleData) {
     return <div>해당 글이 없습니다.</div>;
@@ -52,6 +56,10 @@ export default function ArticleContent({ keys }: ArticleProps) {
 
   if (!profileResponse) {
     return <div>존재하지 않는 사용자의 글입니다.</div>;
+  }
+
+  if (unExpectedError) {
+    throw new Error(unExpectedError);
   }
 
   const profile = profileResponse?.profile;
@@ -72,25 +80,49 @@ export default function ArticleContent({ keys }: ArticleProps) {
         if (!prevData) return articleResponse;
 
         if (favorited) {
-          await unfavoriteArticle(slug);
-          return {
-            ...prevData,
-            article: {
-              ...prevData.article,
-              favoritesCount: prevData.article.favoritesCount - 1,
-              favorited: !favorited,
-            },
-          };
+          try {
+            const unfavoriteResponse = await unfavoriteArticle(slug);
+            handleApiError(
+              unfavoriteResponse,
+              "좋아요 삭제 처리에 실패했습니다."
+            );
+            return {
+              ...prevData,
+              article: {
+                ...prevData.article,
+                favoritesCount: prevData.article.favoritesCount - 1,
+                favorited: false,
+              },
+            };
+          } catch (error) {
+            handleUnexpectedError(
+              error,
+              "좋아요 삭제 처리",
+              setUnExpectedError
+            );
+          }
         } else {
-          await favoriteArticle(slug);
-          return {
-            ...prevData,
-            article: {
-              ...prevData.article,
-              favoritesCount: prevData.article.favoritesCount + 1,
-              favorited: !favorited,
-            },
-          };
+          try {
+            const favoriteResponse = await favoriteArticle(slug);
+            handleApiError(
+              favoriteResponse,
+              "좋아요 추가 처리에 실패했습니다."
+            );
+            return {
+              ...prevData,
+              article: {
+                ...prevData.article,
+                favoritesCount: prevData.article.favoritesCount + 1,
+                favorited: true,
+              },
+            };
+          } catch (error) {
+            handleUnexpectedError(
+              error,
+              "좋아요 추가 처리",
+              setUnExpectedError
+            );
+          }
         }
       },
       {
@@ -102,7 +134,7 @@ export default function ArticleContent({ keys }: ArticleProps) {
               article: {
                 ...prevData.article,
                 favoritesCount: prevData.article.favoritesCount - 1,
-                favorited: !favorited,
+                favorited: false,
               },
             };
           } else {
@@ -111,12 +143,13 @@ export default function ArticleContent({ keys }: ArticleProps) {
               article: {
                 ...prevData.article,
                 favoritesCount: prevData.article.favoritesCount + 1,
-                favorited: !favorited,
+                favorited: true,
               },
             };
           }
         },
         rollbackOnError: true,
+        revalidate: false,
       }
     );
   };
@@ -136,21 +169,21 @@ export default function ArticleContent({ keys }: ArticleProps) {
       async (prevData: ProfileResponse | undefined) => {
         if (!prevData) return profileResponse;
         if (following) {
-          const response = await unfollowUser(username);
-          if (response.error) {
-            throw new Error(
-              response.error?.message || "언팔로우 처리에 실패했습니다."
-            );
+          try {
+            const response = await unfollowUser(username);
+            handleApiError(response, "언팔로우 처리에 실패했습니다.");
+            return response.value?.responseData;
+          } catch (error) {
+            handleUnexpectedError(error, "언팔로우 처리", setUnExpectedError);
           }
-          return response.value?.responseData;
         } else {
-          const response = await followUser(username);
-          if (response.error) {
-            throw new Error(
-              response.error?.message || "팔로우 처리에 실패했습니다."
-            );
+          try {
+            const response = await followUser(username);
+            handleApiError(response, "팔로우 처리에 실패했습니다.");
+            return response.value?.responseData;
+          } catch (error) {
+            handleUnexpectedError(error, "팔로우 처리", setUnExpectedError);
           }
-          return response.value?.responseData;
         }
       },
       {
@@ -175,6 +208,7 @@ export default function ArticleContent({ keys }: ArticleProps) {
           }
         },
         rollbackOnError: true,
+        revalidate: false,
       }
     );
   };
@@ -192,23 +226,17 @@ export default function ArticleContent({ keys }: ArticleProps) {
     if (!confirm) return;
 
     try {
-      const success = await deleteArticle(articleData?.slug);
-      if (success) {
-        if (window.history.length > 1) {
-          router.back();
-        } else {
-          router.push("/");
-        }
+      const deleteResponse = await deleteArticle(articleData?.slug);
+      handleApiError(deleteResponse, "삭제 처리에 실패했습니다.");
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push("/");
       }
     } catch (error) {
-      setError(error as Error);
+      handleUnexpectedError(error, "삭제 처리", setUnExpectedError);
     }
   };
-
-  if (error && !isDisplayError(error)) {
-    console.error(error);
-    throw error;
-  }
 
   return (
     <article className="article-page">

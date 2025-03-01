@@ -11,6 +11,10 @@ import { CommentList } from "./CommentList";
 import { CommentCard } from "./CommentCard";
 import { addComment, deleteComment } from "@/actions/article";
 import { ArticleKeys } from "../Article/ArticleContent";
+import {
+  handleApiError,
+  handleUnexpectedError,
+} from "@/utils/error/errorHandle";
 
 interface CommentsProps {
   slug: string;
@@ -27,12 +31,20 @@ export default function CommentsContainer({ slug, keys }: CommentsProps) {
   const comments = CommentsResponse?.comments;
 
   const [commentText, setCommentText] = useState("");
+  const [unexpectError, setUnexpectError] = useState<string | null>(null);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentText(e.target.value);
   };
 
+  if (unexpectError) {
+    throw new Error(unexpectError);
+  }
+
   const handleAddComment = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (CommentsLoading) return;
+    if (!commentText.trim()) return;
+
     e.preventDefault();
     if (!isLoggedIn) {
       const confirm = window.confirm(
@@ -58,17 +70,21 @@ export default function CommentsContainer({ slug, keys }: CommentsProps) {
     };
 
     await mutate(
-      async (prevData) => {
-        const commentResponse = await addComment(commentText, slug);
-        const comment = commentResponse.value?.responseData?.comment;
-        if (!comment) {
-          throw new Error(
-            commentResponse.error?.message || "댓글 추가에 실패했습니다."
-          );
+      async (prevData: CommentsResponse | undefined) => {
+        try {
+          const commentResponse = await addComment(commentText, slug);
+          handleApiError(commentResponse, "댓글 추가에 실패했습니다.");
+          const comment = commentResponse.value?.responseData?.comment;
+          if (!comment) {
+            throw new Error("예상치 못한 에러로 댓글 추가에 실패했습니다.");
+          }
+
+          return {
+            comments: [comment, ...(prevData?.comments || [])],
+          };
+        } catch (error) {
+          handleUnexpectedError(error, "댓글 추가", setUnexpectError);
         }
-        return {
-          comments: [comment, ...(prevData?.comments || [])],
-        };
       },
       {
         optimisticData: (prevData) => {
@@ -98,10 +114,15 @@ export default function CommentsContainer({ slug, keys }: CommentsProps) {
     await mutate(
       async (prevData) => {
         if (!prevData) return { comments: [] };
-        await deleteComment(id, slug);
-        return {
-          comments: prevData.comments.filter((comment) => comment.id !== id),
-        };
+        try {
+          const deleteResponse = await deleteComment(id, slug);
+          handleApiError(deleteResponse, "댓글 삭제에 실패했습니다.");
+          return {
+            comments: prevData.comments.filter((comment) => comment.id !== id),
+          };
+        } catch (error) {
+          handleUnexpectedError(error, "댓글 삭제", setUnexpectError);
+        }
       },
       {
         optimisticData: (prevData) => {

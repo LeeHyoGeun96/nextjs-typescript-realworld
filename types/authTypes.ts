@@ -1,4 +1,5 @@
 import { ActionState } from "./global";
+import { ProfileResponse } from "./profileTypes";
 
 export type ValidationMessages = Record<string, string>;
 
@@ -31,6 +32,7 @@ export type UpdateProfileState = ActionState<{
     username: string;
     bio?: string;
   };
+  responseData?: ProfileResponse;
 }>;
 
 export interface CurrentUserType {

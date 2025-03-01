@@ -2,17 +2,12 @@
 
 import { SWRConfig } from "swr";
 
-type SWRProviderProps<T> = {
+type SWRProviderProps = {
   children: React.ReactNode;
-  fallback: {
-    [key: string]: T;
-  };
+  fallback: Record<string, unknown>;
 };
 
-export default function SWRProvider<T>({
-  children,
-  fallback,
-}: SWRProviderProps<T>) {
+export default function SWRProvider({ children, fallback }: SWRProviderProps) {
   return (
     <SWRConfig
       value={{

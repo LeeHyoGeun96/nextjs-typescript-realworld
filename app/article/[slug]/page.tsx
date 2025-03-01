@@ -1,8 +1,6 @@
 import ArticleContent from "@/components/Article/ArticleContent";
 import SWRProvider from "@/lib/swr/SWRProvider";
-import { ArticleResponse, CommentsResponse } from "@/types/articleTypes";
 import { Params } from "@/types/global";
-import { ProfileResponse } from "@/types/profileTypes";
 import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { cookies } from "next/headers";
 
@@ -43,22 +41,14 @@ export default async function ArticlePage({ params }: { params: Params }) {
     article: articleKey,
   };
 
-  type ArticleFallback = {
-    [key: string]: {
-      profile: ProfileResponse;
-      comments: CommentsResponse;
-      article: ArticleResponse;
-    };
+  const fallback = {
+    [keys.profile]: profile,
+    [keys.comments]: comments,
+    [keys.article]: articleResponse,
   };
 
   return (
-    <SWRProvider<ArticleFallback>
-      fallback={{
-        [keys.profile]: profile,
-        [keys.comments]: comments,
-        [keys.article]: articleResponse,
-      }}
-    >
+    <SWRProvider fallback={fallback}>
       <ArticleContent keys={keys} />
     </SWRProvider>
   );

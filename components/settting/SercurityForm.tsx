@@ -68,9 +68,8 @@ export default function SecurityForm() {
         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
           비밀번호 변경
         </h3>
+        <ErrorDisplay message={state.error?.message} />
         <form action={formAction} onSubmit={handleSubmit}>
-          <ErrorDisplay message={state.error?.message} />
-
           <InputWithError
             props={{
               type: "password",

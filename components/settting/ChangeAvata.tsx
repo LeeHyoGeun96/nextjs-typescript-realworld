@@ -9,13 +9,20 @@ import { TimestampAvatar } from "../ui/Avata/TimestampAvatar";
 import { deleteAvatar } from "@/actions/storage";
 import { useUser } from "@/hooks/useUser";
 import { ResponseUserType } from "@/types/authTypes";
-import { ErrorDisplay } from "../ErrorDisplay";
+import {
+  handleApiError,
+  handleUnexpectedError,
+} from "@/utils/error/errorHandle";
 export default function ChangeAvata() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setImageData } = useAvatar();
   const { user, mutate: boundMutate } = useUser();
-  const [error, setError] = useState<string | null>(null);
+  const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
+
+  if (unexpectedError) {
+    throw new Error(unexpectedError);
+  }
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -36,17 +43,25 @@ export default function ChangeAvata() {
   const handleDeleteAvatar = async () => {
     await boundMutate(
       async (prevData: ResponseUserType | undefined) => {
-        const { success, error } = await deleteAvatar(user.id);
-        if (!success) {
-          const errorMessage =
-            error?.message || "프로필 이미지 삭제에 실패했습니다.";
-          setError(errorMessage);
-          throw new Error(errorMessage);
+        if (!prevData) {
+          throw new Error("사용자 데이터를 찾을 수 없습니다");
         }
-        return {
-          ...prevData,
-          user: { ...prevData?.user, image: null },
-        };
+
+        try {
+          const deleteAvatarResponse = await deleteAvatar(user.id);
+          handleApiError(deleteAvatarResponse, "프로필 이미지 삭제 실패");
+
+          return {
+            ...prevData,
+            user: { ...prevData?.user, image: null },
+          };
+        } catch (error) {
+          handleUnexpectedError(
+            error,
+            "프로필 이미지 삭제",
+            setUnexpectedError
+          );
+        }
       },
       {
         optimisticData: (prevData: ResponseUserType | undefined) => ({
@@ -72,7 +87,6 @@ export default function ChangeAvata() {
             ref={fileInputRef}
             hidden
           />
-          <ErrorDisplay message={error} />
           <div className="flex gap-4">
             <Button
               onClick={() => fileInputRef.current?.click()}

@@ -8,7 +8,6 @@ import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { parseQueryParams } from "@/utils/parseQueryParams";
 import { cookies } from "next/headers";
 import SWRProvider from "@/lib/swr/SWRProvider";
-import { ArticleType } from "@/types/articleTypes";
 
 export default async function HomePage({
   searchParams,
@@ -48,17 +47,11 @@ export default async function HomePage({
     [`/api/articles/feed?${apiQueryString}`]: feedData,
   };
 
-  type ArticleListFallback = {
-    globalArticles?: ArticleType[];
-    globalArticlesCount?: number;
-    feedArticles?: ArticleType[];
-    feedArticlesCount?: number;
-  };
-
   return (
-    <SWRProvider<ArticleListFallback> fallback={fallback}>
+    <SWRProvider fallback={fallback}>
       <div className="min-h-screen bg-white dark:bg-gray-900">
         {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
+
         <header className="bg-brand-primary dark:bg-gray-800 shadow-inner">
           <div className="container mx-auto px-4 py-12 text-center">
             <h1 className="font-logo text-5xl md:text-6xl lg:text-7xl text-white mb-4 font-bold">
@@ -69,7 +62,6 @@ export default async function HomePage({
             </p>
           </div>
         </header>
-
         {/* 메인 콘텐츠 */}
         <main className="container mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">

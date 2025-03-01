@@ -137,11 +137,8 @@ export async function login(
       value: { inputData },
     };
   } catch (error) {
-    return {
-      success: false,
-      error: { name: "UnexpectedError", message: (error as Error).message },
-      value: { inputData: { email: "", password: "" } },
-    };
+    console.error(error);
+    throw new Error("로그인 도중 예상치 못한 에러가 발생했습니다.");
   }
 }
 
@@ -232,7 +229,6 @@ export async function updatePassword(
 
 // 프로필 업데이트
 export async function updateProfile(
-  _: UpdateProfileState,
   formData: FormData
 ): Promise<UpdateProfileState> {
   try {

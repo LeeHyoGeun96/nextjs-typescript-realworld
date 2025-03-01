@@ -2,14 +2,18 @@
 
 import { updateAvatar } from "@/actions/storage";
 import Crop from "@/components/crop/Crop";
-import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { Button } from "@/components/ui/Button/Button";
 import Modal from "@/components/ui/Modal";
 import { useAvatar } from "@/context/avatar/AvatarContext";
 import { useUser } from "@/hooks/useUser";
 import { ResponseUserType } from "@/types/authTypes";
+import {
+  handleApiError,
+  handleUnexpectedError,
+} from "@/utils/error/errorHandle";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -24,7 +28,11 @@ export default function AvatarModalPage() {
   const router = useRouter();
   const { imageData, setCroppedImage, croppedImage } = useAvatar();
   const { user, mutate } = useUser();
-  const [error, setError] = useState<string | null>(null);
+  const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
+
+  if (unexpectedError) {
+    throw new Error(unexpectedError);
+  }
 
   const handleSave = async () => {
     if (croppedImage) {
@@ -32,30 +40,31 @@ export default function AvatarModalPage() {
 
       await mutate(
         async (currentData: ResponseUserType | undefined) => {
-          const updateAvatarResponse = await updateAvatar(
-            croppedImage,
-            user?.id
-          );
-
-          if (!updateAvatarResponse.success) {
-            const errorMessage =
-              updateAvatarResponse.error?.message ||
-              "프로필 이미지 업데이트에 실패했습니다.";
-            setError(errorMessage);
-            throw new Error(errorMessage);
+          if (!currentData) {
+            throw new Error("사용자 데이터를 찾을 수 없습니다");
           }
 
-          const publicUrl = updateAvatarResponse.value?.publicUrl;
+          try {
+            const updateAvatarResponse = await updateAvatar(
+              croppedImage,
+              user?.id
+            );
 
-          if (!currentData?.user.username) {
-            setError("사용자 정보가 없습니다.");
-            throw new Error("사용자 정보가 없습니다.");
+            handleApiError(updateAvatarResponse, "프로필 이미지 업데이트 실패");
+
+            const publicUrl = updateAvatarResponse.value?.publicUrl;
+
+            return {
+              ...currentData,
+              user: { ...currentData.user, image: publicUrl },
+            };
+          } catch (error) {
+            handleUnexpectedError(
+              error,
+              "프로필 이미지 업데이트",
+              setUnexpectedError
+            );
           }
-
-          return {
-            ...currentData,
-            user: { ...currentData.user, image: publicUrl },
-          };
         },
         {
           optimisticData: (currentData: ResponseUserType | undefined) => ({
@@ -70,15 +79,14 @@ export default function AvatarModalPage() {
 
       router.back();
     } else {
-      setError("파일이 선택되지 않았습니다");
+      toast.error("파일이 선택되지 않았습니다");
     }
   };
 
   return (
     <Modal>
-      <Modal.Header>Update Profile Picture</Modal.Header>
+      <Modal.Header>프로필 이미지 업데이트</Modal.Header>
       <Modal.Content className="w-full relative">
-        <ErrorDisplay message={error} />
         {imageData && (
           <>
             <Crop imageSrc={imageData} setCroppedImage={setCroppedImage} />
@@ -87,9 +95,11 @@ export default function AvatarModalPage() {
       </Modal.Content>
       <Modal.Footer>
         <button onClick={() => router.back()} className=" text-gray-600">
-          Cancel
+          취소
         </button>
-        <Button onClick={handleSave}>Save</Button>
+        <Button onClick={handleSave} disabled={!croppedImage}>
+          저장
+        </Button>
       </Modal.Footer>
     </Modal>
   );
