@@ -147,7 +147,7 @@ export async function deleteAvatar(userId: string): Promise<deleteAvatarState> {
       }
     }
 
-    await setAuthToken(responseData.user.token);
+    await setAuthToken(responseData.token);
 
     return { success: true };
   } catch (error) {
