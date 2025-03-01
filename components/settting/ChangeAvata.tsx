@@ -5,7 +5,7 @@ import readFileAsDataURL from "@/utils/readFileAsDataURL";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "../ui/Button/Button";
-import { TimestampAvatar } from "../ui/Avata/TimestampAvatar";
+import Avatar from "../ui/Avata/Avatar";
 import { deleteAvatar } from "@/actions/storage";
 import { useUser } from "@/hooks/useUser";
 import { ResponseUserType } from "@/types/authTypes";
@@ -78,7 +78,7 @@ export default function ChangeAvata() {
     <section>
       <div className="mb-8">
         <div className="flex items-center gap-8 flex-col">
-          <TimestampAvatar size="xxxxl" user={user} />
+          <Avatar size="xxxxl" user={user} />
           <input
             type="file"
             accept="image/*"

@@ -1,37 +1,26 @@
 "use client";
 
+import { CurrentUserType } from "@/types/authTypes";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-export const TIMESTAMP_AVATAR_SIZE = {
+export const AVATAR_SIZE = {
   sm: "w-6 h-6",
   md: "w-8 h-8",
   lg: "w-12 h-12",
   xxxxl: "w-32 h-32",
 } as const;
 
-export type TimestampAvatarSize = keyof typeof TIMESTAMP_AVATAR_SIZE;
+export type AvatarSize = keyof typeof AVATAR_SIZE;
 
 interface AvatarProps {
-  username: string;
-  image?: string | null;
-  size?: TimestampAvatarSize;
+  user: Pick<CurrentUserType, "image" | "username"> | null | undefined;
+  size?: AvatarSize;
   className?: string;
-  timestamp?: string;
 }
 
-const Avatar = ({
-  username,
-  image,
-  size = "md",
-  className = "",
-  timestamp,
-}: AvatarProps) => {
+const Avatar = ({ user, size = "md", className = "" }: AvatarProps) => {
   const [imgError, setImgError] = useState(false);
-
-  useEffect(() => {
-    setImgError(false);
-  }, [image, timestamp]);
 
   const sizeClasses = {
     sm: "w-6 h-6",
@@ -46,14 +35,10 @@ const Avatar = ({
   const handleError = () => {
     setImgError(true);
   };
+  const { username, image } = user || {};
   const defaultImage = `https://ui-avatars.com/api/?name=${username}&format=png`;
 
-  const imageUrl =
-    imgError || !image
-      ? defaultImage
-      : image.startsWith("data:image")
-      ? image
-      : `${image}?timestamp=${timestamp}`;
+  const imageUrl = imgError || !image ? defaultImage : image;
 
   return (
     <Image

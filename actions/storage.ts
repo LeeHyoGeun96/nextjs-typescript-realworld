@@ -5,6 +5,7 @@ import { deleteAvatarState, updateAvatarState } from "@/types/profileTypes";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { setAuthToken } from "../utils/auth/tokenUtils";
+import { v4 as uuidv4 } from "uuid";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
 
@@ -21,8 +22,9 @@ export async function updateAvatar(
       throw new Error("인증되지 않은 접근입니다.");
     }
 
-    const extension = file.type.split("/")[1];
-    const fileName = `avatar.${extension}`; // 또는 원본 파일명 사용
+    const fileExt = file.name.split(".").pop();
+    const hash = uuidv4();
+    const fileName = `${hash}.${fileExt}`;
 
     // 1. Storage에 이미지 업로드
     const { data: uploadData, error: uploadError } = await supabase.storage
