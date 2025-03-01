@@ -3,17 +3,26 @@
 import { useAvatar } from "@/context/avatar/AvatarContext";
 import readFileAsDataURL from "@/utils/readFileAsDataURL";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "../ui/Button/Button";
-import { TimestampAvatar } from "../ui/Avata/TimestampAvatar";
+import Avatar from "../ui/Avata/Avatar";
 import { deleteAvatar } from "@/actions/storage";
 import { useUser } from "@/hooks/useUser";
 import { ResponseUserType } from "@/types/authTypes";
+import {
+  handleApiError,
+  handleUnexpectedError,
+} from "@/utils/error/errorHandle";
 export default function ChangeAvata() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setImageData } = useAvatar();
   const { user, mutate: boundMutate } = useUser();
+  const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
+
+  if (unexpectedError) {
+    throw new Error(unexpectedError);
+  }
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -34,14 +43,25 @@ export default function ChangeAvata() {
   const handleDeleteAvatar = async () => {
     await boundMutate(
       async (prevData: ResponseUserType | undefined) => {
-        const { success } = await deleteAvatar(user.id);
-        if (!success) {
-          throw new Error("Failed to delete avatar");
+        if (!prevData) {
+          throw new Error("사용자 데이터를 찾을 수 없습니다");
         }
-        return {
-          ...prevData,
-          user: { ...prevData?.user, image: null },
-        };
+
+        try {
+          const deleteAvatarResponse = await deleteAvatar(user.id);
+          handleApiError(deleteAvatarResponse, "프로필 이미지 삭제 실패");
+
+          return {
+            ...prevData,
+            user: { ...prevData?.user, image: null },
+          };
+        } catch (error) {
+          handleUnexpectedError(
+            error,
+            "프로필 이미지 삭제",
+            setUnexpectedError
+          );
+        }
       },
       {
         optimisticData: (prevData: ResponseUserType | undefined) => ({
@@ -58,7 +78,7 @@ export default function ChangeAvata() {
     <section>
       <div className="mb-8">
         <div className="flex items-center gap-8 flex-col">
-          <TimestampAvatar size="xxxxl" user={user} />
+          <Avatar size="xxxxl" user={user} />
           <input
             type="file"
             accept="image/*"

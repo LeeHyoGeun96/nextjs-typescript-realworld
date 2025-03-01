@@ -9,7 +9,7 @@ import {
   SettingsIcon,
 } from "./icons";
 
-import { TimestampAvatar } from "../Avata/TimestampAvatar";
+import Avatar from "../Avata/Avatar";
 
 import { useUser } from "@/hooks/useUser";
 
@@ -49,7 +49,7 @@ export const NavLinks = ({ isMobile }: NavLinksProps) => {
               isMobile={isMobile}
               classes="md:flex md:gap-1 md:translate-y-[1px]"
             >
-              <TimestampAvatar
+              <Avatar
                 user={user}
                 size={isMobile ? "sm" : "md"}
                 className={isMobile ? "" : "mr-1"}

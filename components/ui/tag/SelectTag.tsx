@@ -15,6 +15,7 @@ const SelectTag = ({ tags, selectedTag }: SelectTagProps) => {
       {/* 모바일 버전 */}
       <nav className="lg:hidden">
         <TagList
+          mode="filter"
           tags={tags}
           selectedTag={selectedTag}
           className="overflow-x-auto no-scrollbar touch-scroll pb-2"
@@ -29,7 +30,7 @@ const SelectTag = ({ tags, selectedTag }: SelectTagProps) => {
           </h2>
 
           <nav>
-            <TagList tags={tags} selectedTag={selectedTag} />
+            <TagList tags={tags} selectedTag={selectedTag} mode="filter" />
           </nav>
         </section>
       </aside>

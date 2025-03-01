@@ -1,24 +1,13 @@
 "use client";
 
-import { ArticleType } from "@/types/articleTypes";
 import { SWRConfig } from "swr";
 
-type ArticlesFallback = {
-  [key: string]: {
-    globalArticles?: ArticleType[];
-    globalArticlesCount?: number;
-    feedArticles?: ArticleType[];
-    feedArticlesCount?: number;
-  };
+type SWRProviderProps = {
+  children: React.ReactNode;
+  fallback: Record<string, unknown>;
 };
 
-export default function SWRProvider({
-  children,
-  fallback,
-}: {
-  children: React.ReactNode;
-  fallback: ArticlesFallback;
-}) {
+export default function SWRProvider({ children, fallback }: SWRProviderProps) {
   return (
     <SWRConfig
       value={{

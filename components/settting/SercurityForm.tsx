@@ -2,12 +2,12 @@
 
 import { Button } from "@/components/ui/Button/Button";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { updatePassword } from "@/actions/auth";
 import { UpdatePasswordState } from "@/types/authTypes";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { InputWithError } from "../InputWithError";
-import { isDisplayError, ValidationError } from "@/types/error";
+import { ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
 import { useRouter } from "next/navigation";
 import logout from "@/utils/auth/authUtils";
@@ -20,9 +20,8 @@ const initialState: UpdatePasswordState = {
       password: "",
       passwordConfirm: "",
     },
-    token: null,
   },
-  success: undefined,
+  success: false,
 };
 
 export default function SecurityForm() {
@@ -32,12 +31,7 @@ export default function SecurityForm() {
   );
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
-  const [displayError, setDisplayError] = useState<string | undefined>(
-    undefined
-  );
-  const [unexpectedError, setUnexpectedError] = useState<string | undefined>(
-    undefined
-  );
+
   const [isValid, setIsValid] = useState(false);
   const router = useRouter();
 
@@ -68,35 +62,20 @@ export default function SecurityForm() {
     });
   };
 
-  useEffect(() => {
-    if (state.error) {
-      if (isDisplayError(state.error)) {
-        setDisplayError(state.error.message);
-      } else {
-        setUnexpectedError(state.error.message);
-      }
-    }
-  }, [state.error]);
-
-  if (unexpectedError) {
-    throw new Error(unexpectedError);
-  }
-
   return (
     <div className="flex gap-8 flex-col">
       <section>
         <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
           비밀번호 변경
         </h3>
+        <ErrorDisplay message={state.error?.message} />
         <form action={formAction} onSubmit={handleSubmit}>
-          <ErrorDisplay message={displayError} />
-
           <InputWithError
             props={{
               type: "password",
               name: "currentPassword",
               placeholder: "기존 비밀번호",
-              defaultValue: state.value.inputData.currentPassword,
+              defaultValue: state.value?.inputData.currentPassword,
               onChange: handleChange,
             }}
             className="mb-4"
@@ -112,7 +91,7 @@ export default function SecurityForm() {
               type: "password",
               name: "password",
               placeholder: "새로운 비밀번호",
-              defaultValue: state.value.inputData.password,
+              defaultValue: state.value?.inputData.password,
               onChange: handleChange,
             }}
             className="mb-4"
@@ -128,7 +107,7 @@ export default function SecurityForm() {
               type: "password",
               name: "passwordConfirm",
               placeholder: "새로운 비밀번호 확인",
-              defaultValue: state.value.inputData.passwordConfirm,
+              defaultValue: state.value?.inputData.passwordConfirm,
               onChange: handleChange,
             }}
             className="mb-4"

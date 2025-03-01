@@ -11,15 +11,14 @@ const LoginForm = () => {
   const router = useRouter();
   const { mutate } = useUser();
   const [state, formAction, isPending] = useActionState(login, {
-    error: undefined,
     value: {
       inputData: {
         email: "",
         password: "",
       },
-      token: "",
     },
-    success: undefined,
+    success: false,
+    error: null,
   });
 
   useEffect(() => {
@@ -27,7 +26,7 @@ const LoginForm = () => {
       router.push("/");
       mutate();
     }
-  }, [state?.success, router, state?.value.token, mutate]);
+  }, [state?.success, router, mutate]);
 
   return (
     <AuthFormWrapper

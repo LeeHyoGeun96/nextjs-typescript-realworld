@@ -1,3 +1,5 @@
+import { ActionState } from "./global";
+
 // 도메인 타입들
 export interface AuthorType {
   username: string;
@@ -19,7 +21,11 @@ export interface ArticleType {
   author: AuthorType;
 }
 
-export interface ArticleInterfaceType {
+export interface ArticleResponse {
+  article: ArticleType;
+}
+
+export interface ArticlesResponse {
   articles: ArticleType[];
   articlesCount: number;
 }
@@ -31,6 +37,35 @@ export interface CommentType {
   body: string;
   author: AuthorType;
 }
+
+export interface CommentsResponse {
+  comments: CommentType[];
+}
+
+export interface CommentResponse {
+  comment: CommentType;
+}
+
+export type createArticleState = ActionState<{
+  inputData: {
+    title: string;
+    description: string;
+    body: string;
+    tagList: string[];
+  };
+}>;
+
+export type updateArticleState = createArticleState;
+
+export type favoriteArticleState = ActionState<never>;
+
+export type addCommentState = ActionState<{
+  responseData: CommentResponse;
+}>;
+
+export type deleteCommentState = ActionState<never>;
+
+export type deleteArticleState = ActionState<never>;
 
 export interface ArticleFormType {
   title: string;
