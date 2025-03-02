@@ -2,7 +2,7 @@
 
 import { CurrentUserType } from "@/types/authTypes";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export const AVATAR_SIZE = {
   sm: { class: "w-6 h-6", size: 24 },
@@ -24,12 +24,6 @@ interface AvatarProps {
 
 const Avatar = ({ user, size = "md", className = "" }: AvatarProps) => {
   const [imgError, setImgError] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  // 클라이언트 사이드에서만 실행되는 코드
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleError = () => {
     setImgError(true);
@@ -37,19 +31,32 @@ const Avatar = ({ user, size = "md", className = "" }: AvatarProps) => {
   const { username, image } = user || {};
   const defaultImage = `https://ui-avatars.com/api/?name=${username}&format=png`;
 
-  const imageUrl = (isClient && imgError) || !image ? defaultImage : image;
+  const imageUrl = !image ? defaultImage : image;
 
   return (
-    <Image
-      src={imageUrl}
-      alt={`${username}'s avatar`}
-      width={24}
-      height={24}
-      className={`rounded-full object-cover ${AVATAR_SIZE[size].class} ${className}`}
-      sizes={`${AVATAR_SIZE[size].size}px`}
-      onError={handleError}
-      quality={100}
-    />
+    <div
+      className={`relative rounded-full overflow-hidden ${AVATAR_SIZE[size].class} ${className}`}
+    >
+      <Image
+        src={imageUrl}
+        alt={`${username || "User"}'s avatar`}
+        fill
+        sizes={`${AVATAR_SIZE[size].size}px`}
+        className="object-cover"
+        onError={handleError}
+        quality={75}
+      />
+      {imgError && image && (
+        <Image
+          src={defaultImage}
+          alt={`${username || "User"}'s fallback avatar`}
+          fill
+          sizes={`${AVATAR_SIZE[size].size}px`}
+          className="object-cover"
+          quality={100}
+        />
+      )}
+    </div>
   );
 };
 
