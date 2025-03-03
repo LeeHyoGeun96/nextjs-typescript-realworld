@@ -30,15 +30,18 @@ export type ArticleKeys = {
   profile: string;
 };
 interface ArticleProps {
-  keys: ArticleKeys;
+  initialData: Record<string, unknown>;
+  apiKeys: ArticleKeys;
 }
 
-export default function ArticleContent({ keys }: ArticleProps) {
+export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
   const {
     data: articleResponse,
     mutate: mutateArticle,
     isLoading: isArticleLoading,
-  } = useSWR<ArticleResponse>(keys.article);
+  } = useSWR<ArticleResponse>(apiKeys.article, {
+    fallbackData: initialData[apiKeys.article] as ArticleResponse,
+  });
   const { isLoggedIn } = useUser();
 
   const articleData = articleResponse?.article;
@@ -46,7 +49,9 @@ export default function ArticleContent({ keys }: ArticleProps) {
     data: profileResponse,
     mutate: mutateProfile,
     isLoading: isProfileLoading,
-  } = useSWR<ProfileResponse>(keys.profile);
+  } = useSWR<ProfileResponse>(apiKeys.profile, {
+    fallbackData: initialData[apiKeys.profile] as ProfileResponse,
+  });
   const router = useRouter();
   const [unExpectedError, setUnExpectedError] = useState<string | null>(null);
 
@@ -253,8 +258,10 @@ export default function ArticleContent({ keys }: ArticleProps) {
                 aria-label={`${articleData?.author.username}의 프로필로 이동`}
               >
                 <Avatar
-                  username={articleData?.author.username || ""}
-                  image={articleData?.author.image}
+                  user={{
+                    username: articleData?.author.username || "",
+                    image: articleData?.author.image || "",
+                  }}
                   size="md"
                   className="mr-2 "
                 />
@@ -312,7 +319,11 @@ export default function ArticleContent({ keys }: ArticleProps) {
         <section aria-label="댓글">
           {/* 댓글 컴포넌트는 클라이언트 컴포넌트로 분리 필요 */}
           <div className="text-center py-4">
-            <CommentsContainer slug={articleData?.slug} keys={keys} />
+            <CommentsContainer
+              slug={articleData?.slug}
+              apiKeys={apiKeys}
+              initialData={initialData}
+            />
           </div>
         </section>
       </main>

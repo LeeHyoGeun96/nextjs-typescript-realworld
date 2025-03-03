@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import FavoriteButton from "../ui/FavoriteButton";
-import Avatar from "../ui/Avata/Avatar";
+import FavoriteButton from "./ui/FavoriteButton";
+import Avatar from "./ui/Avata/Avatar";
 import useSWR from "swr";
 import { ArticlesResponse, ArticleType } from "@/types/articleTypes";
 import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
-import TagList from "../ui/tag/TagList";
+import TagList from "./ui/tag/TagList";
 import { useUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import {
@@ -17,21 +17,30 @@ import {
 import { useState } from "react";
 
 interface ArticleListProps {
-  apiQueryString: string;
-  tab: string;
+  apiKeys: Record<string, string>;
+  initialData: Record<string, unknown>;
+  tab?: string;
 }
 
-export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
-  const apiUrl =
-    tab === "personal"
-      ? `/api/articles/feed?${apiQueryString}`
-      : `/api/articles?${apiQueryString}`;
+export default function ArticleList({
+  apiKeys,
+  initialData,
+  tab = "global",
+}: ArticleListProps) {
+  const apiUrl = tab === "personal" ? apiKeys.feedKey : apiKeys.articlesKey;
 
-  const { data, error, isLoading, mutate } = useSWR(apiUrl);
-  const { articles } = data;
+  const { data, error, mutate, isValidating } = useSWR(apiUrl, {
+    fallbackData: initialData[apiUrl],
+  });
+
+  const articles = data?.articles || [];
   const { isLoggedIn } = useUser();
   const router = useRouter();
   const [unExpectedError, setUnExpectedError] = useState("");
+
+  if (!data && isValidating) {
+    return <div>Loading...</div>;
+  }
 
   if (unExpectedError) {
     throw new Error(unExpectedError);
@@ -50,7 +59,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
   }
 
   const handleFavorite = async (slug: string, favorited: boolean) => {
-    if (isLoading) return;
+    if (isValidating) return;
     if (!isLoggedIn) {
       const confirm = window.confirm(
         "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
@@ -65,7 +74,10 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
         if (favorited) {
           try {
             const unfavoriteResponse = await unfavoriteArticle(slug);
-            handleApiError(unfavoriteResponse, "언팔로우 처리에 실패했습니다.");
+            handleApiError(
+              unfavoriteResponse,
+              "좋아요 취소 처리에 실패했습니다."
+            );
             return {
               ...prevData,
               articles: prevData?.articles.map((article) =>
@@ -79,12 +91,16 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
               ),
             };
           } catch (error) {
-            handleUnexpectedError(error, "언팔로우 처리", setUnExpectedError);
+            handleUnexpectedError(
+              error,
+              "좋아요 취소 처리",
+              setUnExpectedError
+            );
           }
         } else {
           try {
             const favoriteResponse = await favoriteArticle(slug);
-            handleApiError(favoriteResponse, "팔로우 처리에 실패했습니다.");
+            handleApiError(favoriteResponse, "좋아요 처리에 실패했습니다.");
             return {
               ...prevData,
               articles: prevData?.articles.map((article) =>
@@ -98,7 +114,7 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
               ),
             };
           } catch (error) {
-            handleUnexpectedError(error, "팔로우 처리", setUnExpectedError);
+            handleUnexpectedError(error, "좋아요 처리", setUnExpectedError);
           }
         }
       },
@@ -153,8 +169,10 @@ export default function ArticleList({ apiQueryString, tab }: ArticleListProps) {
               aria-label={`${article.author.username}의 프로필로 이동`}
             >
               <Avatar
-                username={article.author.username || ""}
-                image={article.author.image}
+                user={{
+                  username: article.author.username,
+                  image: article.author.image || "",
+                }}
                 size="md"
                 className="mr-1"
               />

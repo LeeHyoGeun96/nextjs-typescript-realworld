@@ -53,7 +53,7 @@ const Avatar = ({ user, size = "md", className = "" }: AvatarProps) => {
           fill
           sizes={`${AVATAR_SIZE[size].size}px`}
           className="object-cover"
-          quality={100}
+          quality={75}
         />
       )}
     </div>

@@ -1,1 +1,1 @@
-export const PROTECTED_ROUTES = ["/editor", "/settings", "/profile"];
+export const PROTECTED_ROUTES = ["/editor", "/settings"];

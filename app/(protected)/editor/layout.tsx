@@ -1,3 +1,9 @@
+import { Metadata } from "next";
+export const metadata: Metadata = {
+  title: "글쓰기",
+  description: "글을 작성할 수 있는 페이지입니다.",
+};
+
 export default function EditorLayout({
   children,
 }: {

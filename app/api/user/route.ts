@@ -7,7 +7,7 @@ export async function GET() {
   if (!token)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/user", {
+  const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/user", {
     headers: { Authorization: `Bearer ${token}` },
   });
 

@@ -16,7 +16,7 @@ export const followUser = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/profiles/${username}/follow`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/profiles/${username}/follow`,
       {
         method: "POST",
         headers: {
@@ -55,7 +55,7 @@ export const unfollowUser = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/profiles/${username}/follow`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/profiles/${username}/follow`,
       {
         method: "DELETE",
         headers: {
