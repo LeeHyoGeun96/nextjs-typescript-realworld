@@ -15,10 +15,11 @@ interface FeedToggleProps {
 const FeedToggle = ({ params, isLoggedIn }: FeedToggleProps) => {
   const router = useRouter();
 
-  const tab = params?.tab ?? "global";
-  const tag = params?.tag ?? "";
+  const currentTab = params?.tab ?? "global";
+  const currentTag = params?.tag ?? "";
 
   const handleStateChange = (tab: "global" | "personal") => {
+    if (currentTab === tab) return;
     const current = new URLSearchParams();
     current.set("tab", tab);
     router.push(`?${current.toString()}`);
@@ -38,7 +39,7 @@ const FeedToggle = ({ params, isLoggedIn }: FeedToggleProps) => {
             <button
               onClick={() => handleStateChange("personal")}
               className={`${baseTabStyle} ${
-                tab === "personal" ? activeTabStyle : inactiveTabStyle
+                currentTab === "personal" ? activeTabStyle : inactiveTabStyle
               }`}
             >
               Your Feed
@@ -49,15 +50,19 @@ const FeedToggle = ({ params, isLoggedIn }: FeedToggleProps) => {
           <button
             onClick={() => handleStateChange("global")}
             className={`${baseTabStyle} ${
-              tab === "global" && !tag ? activeTabStyle : inactiveTabStyle
+              currentTab === "global" && !currentTag
+                ? activeTabStyle
+                : inactiveTabStyle
             }`}
           >
             Global Feed
           </button>
         </li>
-        {tag && (
+        {currentTag && (
           <li>
-            <span className={`${baseTabStyle} ${activeTabStyle}`}>#{tag}</span>
+            <span className={`${baseTabStyle} ${activeTabStyle}`}>
+              #{currentTag}
+            </span>
           </li>
         )}
       </ul>
