@@ -20,7 +20,9 @@ export default function ProfileHeader({
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center">
           <Avatar user={profile} size="xxxxl" className="mb-4" />
-          <h2 className="text-2xl font-bold mb-2">{profile.username}</h2>
+          <h2 className="text-2xl font-bold mb-2 dark:text-white">
+            {profile.username}
+          </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-center max-w-2xl">
             {profile.bio || "No bio available"}
           </p>

@@ -101,7 +101,7 @@ const TagList = memo(
             <button
               type="button"
               className="inline-block px-2 py-1 text-sm
-            rounded-full border-red-500 bg-red-500 text-white hover:bg-red-400 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-900/20 focus:ring-red-500 dark:focus:ring-red-400"
+            rounded-full border-red-500 bg-red-400 dark:bg-red-600 text-white hover:bg-red-300 dark:border-red-400 dark:text-gray-300 dark:hover:bg-red-500 focus:ring-red-500 dark:focus:ring-red-400"
               onClick={handleUnfilterTag}
             >
               <MdClose className="w-4 h-4" />

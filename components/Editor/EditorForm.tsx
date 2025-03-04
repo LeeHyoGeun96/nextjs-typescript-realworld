@@ -80,7 +80,7 @@ export function EditorForm({ initialData, slug }: EditorFormProps) {
   };
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-6 dark:text-white ">
       <ErrorDisplay message={state.error?.message} />
 
       <div className="space-y-4">
@@ -137,7 +137,7 @@ export function EditorForm({ initialData, slug }: EditorFormProps) {
 
       <div className="text-right">
         <Button type="submit" variant="primary" disabled={isPending}>
-          {slug ? "Update" : "Publish"} Article
+          {slug ? "수정" : "작성"}
         </Button>
       </div>
     </form>

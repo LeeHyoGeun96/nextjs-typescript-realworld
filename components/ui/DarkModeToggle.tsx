@@ -1,12 +1,31 @@
-import useDarkModeStore from "../lib/zustand/darkModeStore";
+"use client";
+
+import { useEffect, useState } from "react";
+import useDarkModeStore from "../../lib/zustand/darkModeStore";
 
 const DarkModeToggle = () => {
+  // 클라이언트 사이드 렌더링을 위한 마운트 상태
+  const [mounted, setMounted] = useState(false);
   const { isDark, toggle } = useDarkModeStore();
+
+  // 컴포넌트가 마운트된 후에만 렌더링
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 마운트되기 전에는 빈 자리 표시자 반환
+  if (!mounted) {
+    return (
+      <button className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600">
+        <div className="w-5 h-5"></div>
+      </button>
+    );
+  }
 
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
       aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
     >
       {isDark ? (

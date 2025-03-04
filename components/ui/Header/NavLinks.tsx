@@ -12,6 +12,7 @@ import {
 import Avatar from "../Avata/Avatar";
 
 import { useUser } from "@/hooks/useUser";
+import DarkModeToggle from "@/components/ui/DarkModeToggle";
 
 interface NavLinksProps {
   isMobile?: boolean;
@@ -22,7 +23,9 @@ export const NavLinks = ({ isMobile }: NavLinksProps) => {
 
   return (
     <>
-      <li className="md:translate-y-[1px]">{/* <DarkModeToggle /> */}</li>
+      <li className="md:translate-y-[1px]">
+        <DarkModeToggle />
+      </li>
       <li>
         <NavLink href="/" isMobile={isMobile} end>
           {isMobile && <HomeIcon />}

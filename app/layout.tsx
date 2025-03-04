@@ -75,14 +75,42 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="kr" className={roboto.variable}>
-      <body>
-        <SWRProvider fallback={fallback}>
-          <Header />
-          {children}
-          <ToastProvider />
-        </SWRProvider>
-      </body>
+    <html lang="kr" className={roboto.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var mode = localStorage.getItem('dark-mode-storage');
+                  if (mode) {
+                    var parsed = JSON.parse(mode);
+                    if (parsed.state && parsed.state.isDark) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
+                  } else {
+                    // 시스템 설정 확인
+                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                      document.documentElement.classList.add('dark');
+                    }
+                  }
+                } catch (e) {
+                  console.error('다크 모드 초기화 오류:', e);
+                }
+              })();
+            `,
+          }}
+        />
+        <body>
+          <SWRProvider fallback={fallback}>
+            <Header />
+            <main className="dark:bg-gray-900 min-h-screen">{children}</main>
+            <ToastProvider />
+          </SWRProvider>
+        </body>
+      </head>
     </html>
   );
 }

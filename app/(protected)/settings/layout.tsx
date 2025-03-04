@@ -10,7 +10,7 @@ export default function SettingsLayout({
   return (
     <>
       <AvatarProvider>
-        <main className=" dark:bg-gray-900 min-h-screen flex justify-center">
+        <main className="flex justify-center">
           <section className="bg-white dark:bg-gray-800 rounded-lg p-6 md:p-8 max-w-4xl w-full">
             {children}
             <section className="w-full">{modal}</section>

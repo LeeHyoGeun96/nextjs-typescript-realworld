@@ -52,10 +52,10 @@ export default async function HomePage({
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div>
       {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
 
-      <header className="bg-brand-primary dark:bg-gray-800 shadow-inner">
+      <header className="bg-brand-primary dark:bg-gray-800 shadow-inner ">
         <div className="container mx-auto px-4 py-12 text-center">
           <h1 className="font-logo text-5xl md:text-6xl lg:text-7xl text-white mb-4 font-bold">
             conduit
@@ -86,7 +86,7 @@ export default async function HomePage({
           </div>
 
           {/* 사이드바 오른쪽 */}
-          <aside className="hidden lg:block lg:w-64">
+          <aside className="hidden lg:block lg:w-64 ">
             <div className="lg:sticky lg:top-24">
               <SelectTag tags={tags} selectedTag={tag} />
             </div>
