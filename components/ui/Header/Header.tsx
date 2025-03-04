@@ -3,8 +3,8 @@ import { NavLinks } from "./NavLinks";
 
 export default function Header() {
   return (
-    <header>
-      <section className="hidden md:block sticky top-0 bg-white dark:bg-gray-700 shadow-sm z-10">
+    <header className="sticky top-0 z-10 shadow-md">
+      <section className="hidden md:block  bg-white dark:bg-gray-700 ">
         <nav className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <Link className="text-brand-primary text-xl font-bold" href="/">

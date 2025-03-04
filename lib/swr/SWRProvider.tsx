@@ -21,6 +21,7 @@ export default function SWRProvider({ children, fallback }: SWRProviderProps) {
         },
         fallback,
         revalidateOnFocus: false,
+        dedupingInterval: 0,
       }}
     >
       {children}

@@ -19,12 +19,12 @@ export default async function EditorPage({ params }: EditorPageProps) {
   const [articleResponse, userResponse]: [ArticleResponse, ResponseUserType] =
     await Promise.all([
       // 게시글 정보 요청
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}`, {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}`, {
         headers,
       }).then((res) => res.json()),
 
       // 현재 사용자 정보 요청
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, { headers }).then(
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user`, { headers }).then(
         (res) => res.json()
       ),
     ]);

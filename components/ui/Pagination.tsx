@@ -13,7 +13,7 @@ interface PaginationProps {
 export function Pagination({ total, limit }: PaginationProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get("page")) || 1;
+  const currentPage = Number(searchParams?.get("page")) || 1;
   const totalPages = Math.ceil(total / limit);
   const [pageInput, setPageInput] = useState("");
 
@@ -43,8 +43,9 @@ export function Pagination({ total, limit }: PaginationProps) {
   };
 
   const handlePageChange = (page: number) => {
+    if (page === currentPage) return;
     if (page < 1 || page > totalPages) return;
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || "");
     params.set("page", page.toString());
     router.push(`?${params.toString()}`);
   };
@@ -65,7 +66,7 @@ export function Pagination({ total, limit }: PaginationProps) {
   };
 
   return (
-    <nav className="flex items-center justify-center  my-8">
+    <nav className="flex items-center justify-center  py-8">
       <div className="flex items-center justify-center gap-2  relative">
         {/* 맨 처음으로 */}
         <button
@@ -74,7 +75,7 @@ export function Pagination({ total, limit }: PaginationProps) {
           className="px-2 py-1 rounded disabled:opacity-50"
           title="첫 페이지"
         >
-          <RxDoubleArrowLeft className="text-black dark:text-white dark:bg-black" />
+          <RxDoubleArrowLeft className="text-black dark:text-white " />
         </button>
 
         {/* 이전 페이지 */}
@@ -84,7 +85,7 @@ export function Pagination({ total, limit }: PaginationProps) {
           className="px-2 py-1 rounded disabled:opacity-50"
           title="이전 페이지"
         >
-          <MdArrowBackIos className="text-black dark:text-white dark:bg-black" />
+          <MdArrowBackIos className="text-black dark:text-white " />
         </button>
 
         {/* 페이지 번호 버튼들 */}
@@ -95,7 +96,7 @@ export function Pagination({ total, limit }: PaginationProps) {
             className={`px-4 py-2 rounded ${
               pageNum === currentPage
                 ? "bg-brand-primary text-white"
-                : "bg-gray-200 hover:bg-gray-300"
+                : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 dark:text-white"
             }`}
           >
             {pageNum}
@@ -109,7 +110,7 @@ export function Pagination({ total, limit }: PaginationProps) {
           className="px-2 py-1 rounded disabled:opacity-50"
           title="다음 페이지"
         >
-          <MdArrowForwardIos className="text-black dark:text-white dark:bg-black" />
+          <MdArrowForwardIos className="text-black dark:text-white  " />
         </button>
 
         {/* 맨 끝으로 */}
@@ -119,7 +120,7 @@ export function Pagination({ total, limit }: PaginationProps) {
           className="px-2 py-1 rounded disabled:opacity-50"
           title="마지막 페이지"
         >
-          <RxDoubleArrowRight className="text-black dark:text-white dark:bg-black" />
+          <RxDoubleArrowRight className="text-black dark:text-white " />
         </button>
         <section className="absolute left-full whitespace-nowrap">
           {/* 페이지 직접 입력 */}
@@ -132,11 +133,13 @@ export function Pagination({ total, limit }: PaginationProps) {
               value={pageInput}
               onChange={handlePageInputChange}
               placeholder="페이지"
-              className="w-16 px-2 py-1 text-sm border rounded"
+              className="w-16 px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"
               aria-label="페이지 번호 입력"
             />
             <div>
-              <span> / {totalPages}</span>
+              <span className="text-gray-500 dark:text-white">
+                / {totalPages}
+              </span>
             </div>
             <button
               type="submit"

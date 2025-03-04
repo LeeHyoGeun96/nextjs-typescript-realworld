@@ -7,7 +7,8 @@ import { cookies } from "next/headers";
 import { setAuthToken } from "../utils/auth/tokenUtils";
 import { v4 as uuidv4 } from "uuid";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+const API_URL =
+  `${process.env.NEXT_PUBLIC_API_URL}/api` || "http://localhost:3000/api";
 
 export async function updateAvatar(
   file: File,

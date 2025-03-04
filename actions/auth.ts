@@ -53,7 +53,7 @@ export async function signUp(
       };
     }
 
-    const response = await fetch(`${API_URL}/users`, {
+    const response = await fetch(`${API_URL}/api/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -109,7 +109,7 @@ export async function login(
       };
     }
 
-    const response = await fetch(`${API_URL}/users/login`, {
+    const response = await fetch(`${API_URL}/api/users/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -185,7 +185,7 @@ export async function updatePassword(
       };
     }
 
-    const response = await fetch(`${API_URL}/user/password`, {
+    const response = await fetch(`${API_URL}/api/user/password`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -251,7 +251,7 @@ export async function updateProfile(
       };
     }
 
-    const response = await fetch(`${API_URL}/user`, {
+    const response = await fetch(`${API_URL}/api/user`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -301,7 +301,7 @@ export async function deleteAccount(userId: string) {
       throw new Error("인증되지 않은 접근입니다.");
     }
 
-    const response = await fetch(`${API_URL}/user`, {
+    const response = await fetch(`${API_URL}/api/user`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,

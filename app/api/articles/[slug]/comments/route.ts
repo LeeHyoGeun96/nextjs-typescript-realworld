@@ -11,7 +11,7 @@ export async function GET(req: NextApiRequest, { params }: { params: Params }) {
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
   const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + `/articles/${slug}/comments`,
+    process.env.NEXT_PUBLIC_API_URL + `/api/articles/${slug}/comments`,
     {
       headers,
     }

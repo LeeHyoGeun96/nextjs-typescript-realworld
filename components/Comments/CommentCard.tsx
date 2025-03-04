@@ -24,8 +24,10 @@ export function CommentCard({
         <div className="flex items-center">
           <Link href={`/profile/${comment.author.username}`}>
             <Avatar
-              username={comment.author.username}
-              image={comment.author.image}
+              user={{
+                username: comment.author.username,
+                image: comment.author.image || "",
+              }}
               size="sm"
               className="mr-2"
             />

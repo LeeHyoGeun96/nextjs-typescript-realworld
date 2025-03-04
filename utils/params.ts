@@ -3,6 +3,8 @@ export interface ArticleParams {
   tag?: string;
   page?: string;
   limit?: string;
+  author?: string;
+  favorited?: string;
 }
 
 export const DEFAULT_PARAMS: ArticleParams = {
@@ -10,13 +12,16 @@ export const DEFAULT_PARAMS: ArticleParams = {
   tag: "",
   page: "1",
   limit: "10",
+  author: "",
+  favorited: "",
 };
 
 export type TabType = "global" | "personal";
 
 // 비동기 파라미터 초기화 함수
 export async function initializeParams(
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<Record<string, string | string[] | undefined>>,
+  customParams: Partial<ArticleParams> = {}
 ): Promise<ArticleParams> {
   const params = await searchParams;
   const convertedParams: ArticleParams = {};
@@ -29,5 +34,5 @@ export async function initializeParams(
     }
   });
 
-  return { ...DEFAULT_PARAMS, ...convertedParams };
+  return { ...DEFAULT_PARAMS, ...convertedParams, ...customParams };
 }

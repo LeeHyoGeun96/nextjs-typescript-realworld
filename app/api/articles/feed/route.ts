@@ -8,7 +8,7 @@ export async function GET({ queryString }: { queryString: string }) {
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
   const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/articles/feed?" + queryString,
+    process.env.NEXT_PUBLIC_API_URL + "/api/articles/feed?" + queryString,
     {
       headers,
     }
@@ -22,6 +22,7 @@ export async function GET({ queryString }: { queryString: string }) {
   }
 
   const data = await res.json();
+
   return NextResponse.json(data, {
     headers: {
       "Cache-Control": "no-store", // 항상 최신 데이터를 가져옴

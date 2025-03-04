@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
   const res = await fetch(
-    process.env.NEXT_PUBLIC_API_URL + "/articles?" + queryString,
+    process.env.NEXT_PUBLIC_API_URL + "/api/articles?" + queryString,
     {
       headers,
     }

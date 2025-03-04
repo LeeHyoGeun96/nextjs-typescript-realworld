@@ -18,16 +18,24 @@ import {
 
 interface CommentsProps {
   slug: string;
-  keys: ArticleKeys;
+  apiKeys: ArticleKeys;
+  initialData: Record<string, unknown>;
 }
 
-export default function CommentsContainer({ slug, keys }: CommentsProps) {
+export default function CommentsContainer({
+  slug,
+  apiKeys,
+  initialData,
+}: CommentsProps) {
   const { user, isLoggedIn } = useUser();
   const {
     data: CommentsResponse,
     mutate,
     isLoading: CommentsLoading,
-  } = useSWR<CommentsResponse>(keys.comments);
+  } = useSWR<CommentsResponse>(apiKeys.comments, {
+    fallbackData: initialData[apiKeys.comments] as CommentsResponse,
+  });
+
   const comments = CommentsResponse?.comments;
 
   const [commentText, setCommentText] = useState("");

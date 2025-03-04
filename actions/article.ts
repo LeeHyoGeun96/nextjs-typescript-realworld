@@ -23,7 +23,7 @@ export const favoriteArticle = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/favorite`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}/favorite`,
       {
         method: "POST",
         headers: {
@@ -64,7 +64,7 @@ export const unfavoriteArticle = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/favorite`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}/favorite`,
       {
         method: "DELETE",
         headers: {
@@ -112,7 +112,7 @@ export const addComment = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/comments`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}/comments`,
       {
         method: "POST",
         headers: {
@@ -161,7 +161,7 @@ export const deleteComment = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/comments/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}/comments/${id}`,
       {
         method: "DELETE",
         headers: {
@@ -201,7 +201,7 @@ export const deleteArticle = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}`,
       {
         method: "DELETE",
         headers: {
@@ -264,7 +264,7 @@ export const createArticle = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles`,
       {
         method: "POST",
         headers: {
@@ -342,7 +342,7 @@ export const updateArticle = async (
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}`,
       {
         method: "PUT",
         headers: {

@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { authGuard } from "./utils/auth/middlewareAuthGuard";
 
 export async function middleware(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+
   // AuthGuard 실행
 
   const authResult = authGuard(request);
   if (authResult) return authResult;
 
   // 인증 통과 또는 인증이 필요 없는 경우 요청 계속 진행
-  return NextResponse.next();
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {

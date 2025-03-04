@@ -1,5 +1,4 @@
 import ArticleContent from "@/components/Article/ArticleContent";
-import SWRProvider from "@/lib/swr/SWRProvider";
 import { Params } from "@/types/global";
 import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { cookies } from "next/headers";
@@ -11,7 +10,7 @@ export default async function ArticlePage({ params }: { params: Params }) {
   const headers = optionalAuthHeaders(token);
 
   const articleResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/articles/${slug}`,
     {
       headers,
     }
@@ -19,37 +18,30 @@ export default async function ArticlePage({ params }: { params: Params }) {
 
   const article = articleResponse.article;
 
-  const [profile, comments] = await Promise.all([
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/profiles/${article.author.username}`,
-      {
-        headers,
-      }
-    ).then((res) => res.json()),
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/articles/${slug}/comments`, {
-      headers,
-    }).then((res) => res.json()),
-  ]);
-
   const profileKey = `/api/profiles/${article.author.username}`;
   const commentsKey = `/api/articles/${slug}/comments`;
   const articleKey = `/api/articles/${slug}`;
 
-  const keys = {
+  const apiKeys = {
     profile: profileKey,
     comments: commentsKey,
     article: articleKey,
-  };
+  } as const;
+
+  const [profile, comments] = await Promise.all([
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}${apiKeys.profile}`, {
+      headers,
+    }).then((res) => res.json()),
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}${apiKeys.comments}`, {
+      headers,
+    }).then((res) => res.json()),
+  ]);
 
   const fallback = {
-    [keys.profile]: profile,
-    [keys.comments]: comments,
-    [keys.article]: articleResponse,
+    [apiKeys.profile]: profile,
+    [apiKeys.comments]: comments,
+    [apiKeys.article]: articleResponse,
   };
 
-  return (
-    <SWRProvider fallback={fallback}>
-      <ArticleContent keys={keys} />
-    </SWRProvider>
-  );
+  return <ArticleContent apiKeys={apiKeys} initialData={fallback} />;
 }
