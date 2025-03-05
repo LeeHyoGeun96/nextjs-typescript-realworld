@@ -4,7 +4,6 @@ export default function SettingsLayout({
   children,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;
 }) {
   return (
     <>
