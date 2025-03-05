@@ -9,8 +9,8 @@ import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { InputWithError } from "../InputWithError";
 import { ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
-import { useRouter } from "next/navigation";
 import logout from "@/utils/auth/authUtils";
+import DeleteUserModal from "../ui/Modal/DeleteUserModal";
 
 const initialState: UpdatePasswordState = {
   error: undefined,
@@ -31,9 +31,9 @@ export default function SecurityForm() {
   );
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [isValid, setIsValid] = useState(false);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formData = new FormData(e.currentTarget.form!);
@@ -57,9 +57,7 @@ export default function SecurityForm() {
   };
 
   const handleDeleteUser = () => {
-    router.push("/settings/deleteUser", {
-      scroll: false,
-    });
+    setShowDeleteModal(true);
   };
 
   return (
@@ -143,6 +141,9 @@ export default function SecurityForm() {
           회원탈퇴
         </Button>
       </section>
+      {showDeleteModal && (
+        <DeleteUserModal onClose={() => setShowDeleteModal(false)} />
+      )}
     </div>
   );
 }

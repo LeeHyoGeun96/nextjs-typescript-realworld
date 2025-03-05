@@ -28,6 +28,9 @@ const TagList = memo(
 
     const handleTagClick = useCallback(
       (e: React.MouseEvent, tag: string) => {
+        if (tag === selectedTag) {
+          return;
+        }
         // 이벤트 버블링 방지
         if (isEditMode) return;
         e.preventDefault();
@@ -37,7 +40,7 @@ const TagList = memo(
         current.set("tag", tag);
         router.push(`/?${current.toString()}`);
       },
-      [router, isEditMode]
+      [router, isEditMode, selectedTag]
     );
 
     const handleUnfilterTag = useCallback(

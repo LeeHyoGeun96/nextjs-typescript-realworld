@@ -11,6 +11,7 @@ export interface ModalHeaderProps {
   children: React.ReactNode;
   showClose?: boolean;
   className?: string;
+  onClose: () => void;
 }
 
 export interface ModalContentProps {
