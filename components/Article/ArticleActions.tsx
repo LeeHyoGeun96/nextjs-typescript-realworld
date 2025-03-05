@@ -78,7 +78,7 @@ export default function ArticleActions({
             className="btn-outline-blue"
             aria-label="글 수정하기"
           >
-            <i className="ion-edit" aria-hidden="true"></i> Edit Article
+            <i className="ion-edit" aria-hidden="true"></i> 글 수정
           </Link>
           <button
             className="btn-outline-red"
@@ -86,7 +86,7 @@ export default function ArticleActions({
             onClick={handleDelete}
             aria-label="글 삭제하기"
           >
-            <i className="ion-trash-a" aria-hidden="true"></i> Delete Article
+            <i className="ion-trash-a" aria-hidden="true"></i> 글 삭제
           </button>
         </>
       ) : (
@@ -97,7 +97,7 @@ export default function ArticleActions({
         >
           <i className="ion-plus-round mr-[1px]" aria-hidden="true"></i>
           <span>
-            {following ? "Unfollow" : "Follow"} {article.author.username}
+            {following ? "언팔로우" : "팔로우"} {article.author.username}
           </span>
         </button>
       )}

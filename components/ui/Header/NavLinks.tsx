@@ -29,7 +29,7 @@ export const NavLinks = ({ isMobile }: NavLinksProps) => {
       <li>
         <NavLink href="/" isMobile={isMobile} end>
           {isMobile && <HomeIcon />}
-          <span>Home</span>
+          <span>글 목록</span>
         </NavLink>
       </li>
       {isLoggedIn ? (
@@ -37,13 +37,13 @@ export const NavLinks = ({ isMobile }: NavLinksProps) => {
           <li>
             <NavLink href="/editor" isMobile={isMobile}>
               {isMobile && <EditIcon />}
-              <span>New Article</span>
+              <span>글 작성</span>
             </NavLink>
           </li>
           <li>
             <NavLink href="/settings" isMobile={isMobile}>
               {isMobile && <SettingsIcon />}
-              <span>Settings</span>
+              <span>설정</span>
             </NavLink>
           </li>
           <li>
@@ -68,13 +68,13 @@ export const NavLinks = ({ isMobile }: NavLinksProps) => {
           <li>
             <NavLink href="/login" isMobile={isMobile}>
               {isMobile && <LoginIcon />}
-              <span>Sign in</span>
+              <span>로그인</span>
             </NavLink>
           </li>
           <li>
             <NavLink href="/register" isMobile={isMobile}>
               {isMobile && <RegisterIcon />}
-              <span>Sign up</span>
+              <span>회원가입</span>
             </NavLink>
           </li>
         </>

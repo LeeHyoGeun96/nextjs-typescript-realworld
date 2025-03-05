@@ -37,7 +37,7 @@ export default function ProfileTabs({
               }
             }}
           >
-            My Articles
+            {username}의 게시글
           </Link>
           <Link
             href={`/profile/${username}/favorites`}
@@ -50,7 +50,7 @@ export default function ProfileTabs({
               }
             }}
           >
-            Favorited Articles
+            {username}의 좋아요한 게시글
           </Link>
         </nav>
 

@@ -22,7 +22,7 @@ export default function ProfileHeader({
             {profile.username}
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-center max-w-2xl">
-            {profile.bio || "No bio available"}
+            {profile.bio || "자기소개가 없습니다."}
           </p>
 
           <ProfileActions apiKeys={apiKeys} />

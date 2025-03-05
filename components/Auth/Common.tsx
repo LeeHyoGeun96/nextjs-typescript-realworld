@@ -24,7 +24,7 @@ export const AuthFormWrapper = ({
   action,
   onSubmit,
   error,
-  clientIsValid,
+  clientIsValid = false,
   isPending,
   children,
 }: AuthFormWrapperProps) => {

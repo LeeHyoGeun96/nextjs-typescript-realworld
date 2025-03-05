@@ -112,7 +112,7 @@ export default function ProfileActions({ apiKeys }: ProfileActionsProps) {
           aria-label="프로필 설정 편집"
         >
           <i className="ion-gear-a mr-1" aria-hidden="true"></i>
-          <span>Edit Profile Settings</span>
+          <span>프로필 설정</span>
         </Link>
       ) : (
         <button
@@ -127,7 +127,7 @@ export default function ProfileActions({ apiKeys }: ProfileActionsProps) {
             aria-hidden="true"
           ></i>
           <span>
-            {following ? "Unfollow" : "Follow"} {username}
+            {following ? "언팔로우" : "팔로우"} {username}
           </span>
         </button>
       )}
