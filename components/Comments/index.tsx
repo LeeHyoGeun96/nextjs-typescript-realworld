@@ -1,4 +1,3 @@
-// components/Comments/index.tsx
 "use client";
 
 import { useState } from "react";

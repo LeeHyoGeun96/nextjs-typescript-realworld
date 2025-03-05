@@ -1,4 +1,3 @@
-// components/Comments/CommentCard.tsx
 import Link from "next/link";
 import { CommentType } from "@/types/articleTypes";
 import Avatar from "@/components/ui/Avata/Avatar";

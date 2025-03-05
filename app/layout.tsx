@@ -107,6 +107,7 @@ export default async function RootLayout({
           <SWRProvider fallback={fallback}>
             <Header />
             <main className="dark:bg-gray-900 min-h-screen">{children}</main>
+            <div id="modal-root" />
             <ToastProvider />
           </SWRProvider>
         </body>

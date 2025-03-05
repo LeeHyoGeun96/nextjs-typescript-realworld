@@ -5,6 +5,9 @@ interface ErrorMessages {
 }
 
 const errorMessages: ErrorMessages = {
+  "email or password": {
+    "is invalid": "이메일 또는 비밀번호가 올바르지 않습니다",
+  },
   user: {
     "can't be blank": "필수 입력 항목입니다",
     "has already been taken": "이미 사용중입니다",

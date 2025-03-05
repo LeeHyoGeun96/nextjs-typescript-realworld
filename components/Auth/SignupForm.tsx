@@ -12,7 +12,6 @@ import { PasswordStrength } from "../PasswordStrength";
 const SignupForm = () => {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(signUp, {
-    error: undefined,
     value: {
       inputData: {
         username: "",
@@ -21,7 +20,7 @@ const SignupForm = () => {
         passwordConfirm: "",
       },
     },
-    success: undefined,
+    success: false,
   });
 
   const [isValid, setIsValid] = useState(false);
