@@ -7,6 +7,7 @@ import { cookies, headers } from "next/headers";
 import { Pagination } from "@/components/ui/Pagination";
 import { ProfileResponse } from "@/types/profileTypes";
 import { ArticlesResponse } from "@/types/articleTypes";
+import SWRProvider from "@/lib/swr/SWRProvider";
 
 const PAGE_LIMIT = 5;
 
@@ -67,24 +68,21 @@ export default async function ProfilePage({
   };
 
   return (
-    <div className="profile-page">
-      {/* 프로필 헤더 - 서버 컴포넌트 */}
-      <ProfileHeader
-        profile={profileData}
-        apiKeys={apiKeys}
-        initialData={fallback}
-      />
+    <SWRProvider fallback={fallback}>
+      <div className="profile-page">
+        {/* 프로필 헤더 - 서버 컴포넌트 */}
+        <ProfileHeader profile={profileData} apiKeys={apiKeys} />
 
-      {/* 탭 UI - 클라이언트 컴포넌트 */}
+        {/* 탭 UI - 클라이언트 컴포넌트 */}
 
-      <ProfileTabs
-        username={username}
-        apiKeys={apiKeys}
-        initialData={fallback}
-        isFavoritesTab={isFavorites}
-      />
+        <ProfileTabs
+          username={username}
+          apiKeys={apiKeys}
+          isFavoritesTab={isFavorites}
+        />
 
-      <Pagination total={articlesCount} limit={PAGE_LIMIT} />
-    </div>
+        <Pagination total={articlesCount} limit={PAGE_LIMIT} />
+      </div>
+    </SWRProvider>
   );
 }

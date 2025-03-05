@@ -63,6 +63,7 @@ export default function SettingForm() {
         },
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
   };

@@ -4,7 +4,7 @@ import Link from "next/link";
 import FavoriteButton from "./ui/FavoriteButton";
 import Avatar from "./ui/Avata/Avatar";
 import useSWR from "swr";
-import { ArticlesResponse, ArticleType } from "@/types/articleTypes";
+import { ArticleType } from "@/types/articleTypes";
 import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
 import TagList from "./ui/tag/TagList";
@@ -18,20 +18,16 @@ import { useState } from "react";
 
 interface ArticleListProps {
   apiKeys: Record<string, string>;
-  initialData: Record<string, unknown>;
   tab?: string;
 }
 
 export default function ArticleList({
   apiKeys,
-  initialData,
   tab = "global",
 }: ArticleListProps) {
   const apiUrl = tab === "personal" ? apiKeys.feedKey : apiKeys.articlesKey;
 
-  const { data, error, mutate, isValidating } = useSWR(apiUrl, {
-    fallbackData: initialData[apiUrl],
-  });
+  const { data, error, mutate, isValidating } = useSWR(apiUrl);
 
   const articles = data?.articles || [];
   const { isLoggedIn } = useUser();
@@ -70,7 +66,7 @@ export default function ArticleList({
     }
 
     await mutate(
-      async (prevData: ArticlesResponse | undefined) => {
+      async () => {
         if (favorited) {
           try {
             const unfavoriteResponse = await unfavoriteArticle(slug);
@@ -79,8 +75,8 @@ export default function ArticleList({
               "좋아요 취소 처리에 실패했습니다."
             );
             return {
-              ...prevData,
-              articles: prevData?.articles.map((article) =>
+              ...data,
+              articles: data?.articles.map((article: ArticleType) =>
                 article.slug === slug
                   ? {
                       ...article,
@@ -102,8 +98,8 @@ export default function ArticleList({
             const favoriteResponse = await favoriteArticle(slug);
             handleApiError(favoriteResponse, "좋아요 처리에 실패했습니다.");
             return {
-              ...prevData,
-              articles: prevData?.articles.map((article) =>
+              ...data,
+              articles: data?.articles.map((article: ArticleType) =>
                 article.slug === slug
                   ? {
                       ...article,
@@ -119,12 +115,12 @@ export default function ArticleList({
         }
       },
       {
-        optimisticData: (prevData: ArticlesResponse | undefined) => {
-          if (!prevData) return prevData;
+        optimisticData: () => {
+          if (!data) return data;
           if (favorited) {
             return {
-              ...prevData,
-              articles: prevData?.articles.map((article) =>
+              ...data,
+              articles: data?.articles.map((article: ArticleType) =>
                 article.slug === slug
                   ? {
                       ...article,
@@ -136,8 +132,8 @@ export default function ArticleList({
             };
           } else {
             return {
-              ...prevData,
-              articles: prevData?.articles.map((article) =>
+              ...data,
+              articles: data?.articles.map((article: ArticleType) =>
                 article.slug === slug
                   ? {
                       ...article,
@@ -151,6 +147,7 @@ export default function ArticleList({
         },
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
   };
@@ -177,7 +174,7 @@ export default function ArticleList({
                 className="mr-1"
               />
             </Link>
-            <div className="flex flex-col ml-3 flex-grow">
+            <div className="flex flex-col ml-1 flex-grow">
               <Link
                 href={`/profile/${article.author.username}`}
                 className="text-brand-primary hover:text-brand-secondary font-medium"
@@ -207,7 +204,7 @@ export default function ArticleList({
               <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100 group-hover:text-brand-primary">
                 {article.title}
               </h2>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
+              <p className="text-gray-600 dark:text-gray-100 mb-4">
                 {article.description}
               </p>
               <footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between flex-wrap">

@@ -16,13 +16,9 @@ interface ProfileActionsProps {
   apiKeys: {
     profileKey: string;
   };
-  initialData: Record<string, unknown>;
 }
 
-export default function ProfileActions({
-  apiKeys,
-  initialData,
-}: ProfileActionsProps) {
+export default function ProfileActions({ apiKeys }: ProfileActionsProps) {
   const router = useRouter();
   const { isLoggedIn } = useUser();
   const [unExpectedError, setUnExpectedError] = useState<string | null>(null);
@@ -30,9 +26,7 @@ export default function ProfileActions({
     data: profileResponse,
     mutate: mutateProfile,
     isLoading: isProfileLoading,
-  } = useSWR<ProfileResponse>(apiKeys.profileKey, {
-    fallbackData: initialData[apiKeys.profileKey] as ProfileResponse,
-  });
+  } = useSWR<ProfileResponse>(apiKeys.profileKey);
 
   if (unExpectedError) {
     throw new Error(unExpectedError);
@@ -61,8 +55,7 @@ export default function ProfileActions({
     }
 
     await mutateProfile(
-      async (prevData: ProfileResponse | undefined) => {
-        if (!prevData) return profileResponse;
+      async () => {
         if (following) {
           try {
             const response = await unfollowUser(username);
@@ -82,21 +75,20 @@ export default function ProfileActions({
         }
       },
       {
-        optimisticData: (prevData: ProfileResponse | undefined) => {
-          if (!prevData) return profileResponse;
+        optimisticData: () => {
           if (following) {
             return {
-              ...prevData,
+              ...profileResponse,
               profile: {
-                ...prevData.profile,
+                ...profileResponse.profile,
                 following: false,
               },
             };
           } else {
             return {
-              ...prevData,
+              ...profileResponse,
               profile: {
-                ...prevData.profile,
+                ...profileResponse.profile,
                 following: true,
               },
             };

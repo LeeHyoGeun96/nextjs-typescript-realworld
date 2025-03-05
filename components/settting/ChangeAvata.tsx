@@ -70,6 +70,7 @@ export default function ChangeAvata() {
         }),
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
   };

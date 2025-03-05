@@ -7,14 +7,12 @@ import ArticleList from "../ArticleList";
 interface ProfileTabsProps {
   username: string;
   apiKeys: Record<string, string>;
-  initialData: Record<string, unknown>;
   isFavoritesTab: boolean;
 }
 
 export default function ProfileTabs({
   username,
   apiKeys,
-  initialData,
   isFavoritesTab,
 }: ProfileTabsProps) {
   const baseTabStyle = "inline-block px-4 py-2 transition-colors duration-200";
@@ -58,11 +56,7 @@ export default function ProfileTabs({
 
         {/* 탭 컨텐츠 */}
         <div className="tab-content">
-          <ArticleList
-            apiKeys={apiKeys}
-            initialData={initialData}
-            tab={"global"}
-          />
+          <ArticleList apiKeys={apiKeys} tab={"global"} />
         </div>
       </div>
     </div>

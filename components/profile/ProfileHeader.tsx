@@ -7,13 +7,11 @@ interface ProfileHeaderProps {
   apiKeys: {
     profileKey: string;
   };
-  initialData: Record<string, unknown>;
 }
 
 export default function ProfileHeader({
   profile,
   apiKeys,
-  initialData,
 }: ProfileHeaderProps) {
   return (
     <header className="bg-gray-100 dark:bg-gray-800 py-8">
@@ -27,7 +25,7 @@ export default function ProfileHeader({
             {profile.bio || "No bio available"}
           </p>
 
-          <ProfileActions apiKeys={apiKeys} initialData={initialData} />
+          <ProfileActions apiKeys={apiKeys} />
         </div>
       </div>
     </header>

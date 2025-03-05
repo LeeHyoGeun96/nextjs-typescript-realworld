@@ -1,4 +1,5 @@
 import ArticleContent from "@/components/Article/ArticleContent";
+import SWRProvider from "@/lib/swr/SWRProvider";
 import { Params } from "@/types/global";
 import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { cookies } from "next/headers";
@@ -43,5 +44,11 @@ export default async function ArticlePage({ params }: { params: Params }) {
     [apiKeys.article]: articleResponse,
   };
 
-  return <ArticleContent apiKeys={apiKeys} initialData={fallback} />;
+  console.log("articleResponse", articleResponse);
+
+  return (
+    <SWRProvider fallback={fallback}>
+      <ArticleContent apiKeys={apiKeys} />
+    </SWRProvider>
+  );
 }

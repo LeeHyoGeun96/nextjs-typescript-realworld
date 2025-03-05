@@ -18,22 +18,15 @@ import {
 interface CommentsProps {
   slug: string;
   apiKeys: ArticleKeys;
-  initialData: Record<string, unknown>;
 }
 
-export default function CommentsContainer({
-  slug,
-  apiKeys,
-  initialData,
-}: CommentsProps) {
+export default function CommentsContainer({ slug, apiKeys }: CommentsProps) {
   const { user, isLoggedIn } = useUser();
   const {
     data: CommentsResponse,
     mutate,
     isLoading: CommentsLoading,
-  } = useSWR<CommentsResponse>(apiKeys.comments, {
-    fallbackData: initialData[apiKeys.comments] as CommentsResponse,
-  });
+  } = useSWR<CommentsResponse>(apiKeys.comments);
 
   const comments = CommentsResponse?.comments;
 
@@ -102,6 +95,7 @@ export default function CommentsContainer({
         },
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
     setCommentText("");
