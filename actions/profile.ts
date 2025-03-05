@@ -29,7 +29,7 @@ export const followUser = async (
 
     if (!response.ok) {
       const errorMessage =
-        translateError(responseData.errors) || "팔로우 처리에 실패했습니다.";
+        translateError(responseData.error) || "팔로우 처리에 실패했습니다.";
       throw new Error(errorMessage);
     }
 
@@ -68,7 +68,7 @@ export const unfollowUser = async (
 
     if (!response.ok) {
       const errorMessage =
-        translateError(responseData.errors) || "언팔로우 처리에 실패했습니다.";
+        translateError(responseData.error) || "언팔로우 처리에 실패했습니다.";
       throw new Error(errorMessage);
     }
 

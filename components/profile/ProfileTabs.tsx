@@ -7,14 +7,12 @@ import ArticleList from "../ArticleList";
 interface ProfileTabsProps {
   username: string;
   apiKeys: Record<string, string>;
-  initialData: Record<string, unknown>;
   isFavoritesTab: boolean;
 }
 
 export default function ProfileTabs({
   username,
   apiKeys,
-  initialData,
   isFavoritesTab,
 }: ProfileTabsProps) {
   const baseTabStyle = "inline-block px-4 py-2 transition-colors duration-200";
@@ -39,7 +37,7 @@ export default function ProfileTabs({
               }
             }}
           >
-            My Articles
+            {username}의 게시글
           </Link>
           <Link
             href={`/profile/${username}/favorites`}
@@ -52,17 +50,13 @@ export default function ProfileTabs({
               }
             }}
           >
-            Favorited Articles
+            {username}의 좋아요한 게시글
           </Link>
         </nav>
 
         {/* 탭 컨텐츠 */}
         <div className="tab-content">
-          <ArticleList
-            apiKeys={apiKeys}
-            initialData={initialData}
-            tab={"global"}
-          />
+          <ArticleList apiKeys={apiKeys} tab={"global"} />
         </div>
       </div>
     </div>

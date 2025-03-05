@@ -20,7 +20,7 @@ export default function NavLink({
   const pathname = usePathname();
   const isActive = end
     ? pathname === props.href.toString()
-    : pathname.startsWith(props.href.toString());
+    : pathname?.startsWith(props.href.toString() ?? "");
 
   const linkClass = ({
     classes,
@@ -37,7 +37,7 @@ export default function NavLink({
           isActive ? "text-brand-primary" : "text-gray-600 dark:text-gray-300"
         }`;
 
-  const css = linkClass({ isActive, classes });
+  const css = linkClass({ isActive: isActive ?? false, classes });
 
   return (
     <Link className={css} {...props}>

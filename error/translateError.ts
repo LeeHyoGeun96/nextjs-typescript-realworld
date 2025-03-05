@@ -5,6 +5,9 @@ interface ErrorMessages {
 }
 
 const errorMessages: ErrorMessages = {
+  "email or password": {
+    "is invalid": "이메일 또는 비밀번호가 올바르지 않습니다",
+  },
   user: {
     "can't be blank": "필수 입력 항목입니다",
     "has already been taken": "이미 사용중입니다",
@@ -41,6 +44,9 @@ const errorMessages: ErrorMessages = {
   comment: {
     "not found": "댓글을 찾을 수 없습니다",
     "can't be blank": "댓글 내용을 입력해주세요",
+  },
+  "current password": {
+    "is invalid": "현재 비밀번호가 올바르지 않습니다",
   },
 };
 

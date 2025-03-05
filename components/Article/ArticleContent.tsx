@@ -30,28 +30,21 @@ export type ArticleKeys = {
   profile: string;
 };
 interface ArticleProps {
-  initialData: Record<string, unknown>;
   apiKeys: ArticleKeys;
 }
 
-export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
-  const {
-    data: articleResponse,
-    mutate: mutateArticle,
-    isLoading: isArticleLoading,
-  } = useSWR<ArticleResponse>(apiKeys.article, {
-    fallbackData: initialData[apiKeys.article] as ArticleResponse,
-  });
+export default function ArticleContent({ apiKeys }: ArticleProps) {
+  const { data: articleResponse, mutate: mutateArticle } =
+    useSWR<ArticleResponse>(apiKeys.article);
   const { isLoggedIn } = useUser();
 
   const articleData = articleResponse?.article;
+
   const {
     data: profileResponse,
     mutate: mutateProfile,
     isLoading: isProfileLoading,
-  } = useSWR<ProfileResponse>(apiKeys.profile, {
-    fallbackData: initialData[apiKeys.profile] as ProfileResponse,
-  });
+  } = useSWR<ProfileResponse>(apiKeys.profile);
   const router = useRouter();
   const [unExpectedError, setUnExpectedError] = useState<string | null>(null);
 
@@ -70,7 +63,6 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
   const profile = profileResponse?.profile;
 
   const handleFavorite = async (slug: string, favorited: boolean) => {
-    if (isArticleLoading) return;
     if (!isLoggedIn) {
       const confirm = window.confirm(
         "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
@@ -81,9 +73,7 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
     }
 
     await mutateArticle(
-      async (prevData: ArticleResponse | undefined) => {
-        if (!prevData) return articleResponse;
-
+      async () => {
         if (favorited) {
           try {
             const unfavoriteResponse = await unfavoriteArticle(slug);
@@ -92,10 +82,10 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
               "좋아요 삭제 처리에 실패했습니다."
             );
             return {
-              ...prevData,
+              ...articleResponse,
               article: {
-                ...prevData.article,
-                favoritesCount: prevData.article.favoritesCount - 1,
+                ...articleResponse.article,
+                favoritesCount: articleResponse.article.favoritesCount - 1,
                 favorited: false,
               },
             };
@@ -114,10 +104,10 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
               "좋아요 추가 처리에 실패했습니다."
             );
             return {
-              ...prevData,
+              ...articleResponse,
               article: {
-                ...prevData.article,
-                favoritesCount: prevData.article.favoritesCount + 1,
+                ...articleResponse.article,
+                favoritesCount: articleResponse.article.favoritesCount + 1,
                 favorited: true,
               },
             };
@@ -131,23 +121,23 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
         }
       },
       {
-        optimisticData: (prevData: ArticleResponse | undefined) => {
-          if (!prevData) return articleResponse;
+        optimisticData: () => {
+          if (!articleResponse) return articleResponse;
           if (favorited) {
             return {
-              ...prevData,
+              ...articleResponse,
               article: {
-                ...prevData.article,
-                favoritesCount: prevData.article.favoritesCount - 1,
+                ...articleResponse.article,
+                favoritesCount: articleResponse.article.favoritesCount - 1,
                 favorited: false,
               },
             };
           } else {
             return {
-              ...prevData,
+              ...articleResponse,
               article: {
-                ...prevData.article,
-                favoritesCount: prevData.article.favoritesCount + 1,
+                ...articleResponse.article,
+                favoritesCount: articleResponse.article.favoritesCount + 1,
                 favorited: true,
               },
             };
@@ -155,6 +145,7 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
         },
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
   };
@@ -171,8 +162,7 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
     }
 
     await mutateProfile(
-      async (prevData: ProfileResponse | undefined) => {
-        if (!prevData) return profileResponse;
+      async () => {
         if (following) {
           try {
             const response = await unfollowUser(username);
@@ -192,21 +182,20 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
         }
       },
       {
-        optimisticData: (prevData: ProfileResponse | undefined) => {
-          if (!prevData) return profileResponse;
+        optimisticData: () => {
           if (following) {
             return {
-              ...prevData,
+              ...profileResponse,
               profile: {
-                ...prevData.profile,
+                ...profileResponse.profile,
                 following: false,
               },
             };
           } else {
             return {
-              ...prevData,
+              ...profileResponse,
               profile: {
-                ...prevData.profile,
+                ...profileResponse.profile,
                 following: true,
               },
             };
@@ -319,11 +308,7 @@ export default function ArticleContent({ apiKeys, initialData }: ArticleProps) {
         <section aria-label="댓글">
           {/* 댓글 컴포넌트는 클라이언트 컴포넌트로 분리 필요 */}
           <div className="text-center py-4">
-            <CommentsContainer
-              slug={articleData?.slug}
-              apiKeys={apiKeys}
-              initialData={initialData}
-            />
+            <CommentsContainer slug={articleData?.slug} apiKeys={apiKeys} />
           </div>
         </section>
       </main>

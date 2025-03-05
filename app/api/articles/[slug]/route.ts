@@ -1,13 +1,12 @@
 import { Params } from "@/types/global";
-import { NextApiRequest } from "next";
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextApiRequest, { params }: { params: Params }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
   const { slug } = await params;
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get("token")?.value;
+  const token = request.cookies.get("token")?.value;
 
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 

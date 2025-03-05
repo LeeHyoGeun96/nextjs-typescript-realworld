@@ -2,7 +2,6 @@
 
 import { useAvatar } from "@/context/avatar/AvatarContext";
 import readFileAsDataURL from "@/utils/readFileAsDataURL";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "../ui/Button/Button";
 import Avatar from "../ui/Avata/Avatar";
@@ -13,12 +12,13 @@ import {
   handleApiError,
   handleUnexpectedError,
 } from "@/utils/error/errorHandle";
+import ChangeAvatarModal from "../ui/Modal/ChangeAvatarModal";
 export default function ChangeAvata() {
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setImageData } = useAvatar();
   const { user, mutate: boundMutate } = useUser();
   const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
+  const [showChangeAvatarModal, setShowChangeAvatarModal] = useState(false);
 
   if (unexpectedError) {
     throw new Error(unexpectedError);
@@ -32,7 +32,7 @@ export default function ChangeAvata() {
       if (file.type.startsWith("image/")) {
         const base64 = await readFileAsDataURL(file);
         setImageData(base64);
-        router.push("/settings/avatar");
+        setShowChangeAvatarModal(true);
       } else {
         alert("이미지 파일만 선택할 수 있습니다.");
       }
@@ -70,6 +70,7 @@ export default function ChangeAvata() {
         }),
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
   };
@@ -101,6 +102,9 @@ export default function ChangeAvata() {
           </div>
         </div>
       </div>
+      {showChangeAvatarModal && (
+        <ChangeAvatarModal onClose={() => setShowChangeAvatarModal(false)} />
+      )}
     </section>
   );
 }

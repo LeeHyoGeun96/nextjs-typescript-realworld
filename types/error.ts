@@ -12,20 +12,7 @@ export function isValidationError(error: unknown): error is ValidationError {
   );
 }
 
-export function isDisplayError(error: unknown): error is DisplayError {
-  if (error === undefined) {
-    return false;
-  }
-
-  return (
-    error !== null &&
-    typeof error === "object" &&
-    "name" in error &&
-    error.name === "DisplayError"
-  );
-}
-
-export type ApiError = Error | ValidationError | DisplayError;
+export type ApiError = Error | ValidationError | null;
 
 // 개별 에러 메시지 타입
 export type ErrorMessage = string[];

@@ -1,23 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useCallback } from "react";
 import { ModalProps } from "./types";
 import { ModalHeader } from "./Header";
 import { ModalContent } from "./Content";
 import { ModalFooter } from "./Footer";
 import { allowScroll, preventScroll } from "@/utils/preventScroll";
+import { createPortal } from "react-dom";
 
 export default function Modal({ children, onClose, className }: ModalProps) {
-  const router = useRouter();
-
   const handleClose = useCallback(() => {
-    if (onClose) {
-      onClose();
-    } else {
-      router.back();
-    }
-  }, [onClose, router]);
+    onClose?.();
+  }, [onClose]);
 
   // ESC 키 처리
   useEffect(() => {
@@ -36,7 +30,7 @@ export default function Modal({ children, onClose, className }: ModalProps) {
     };
   }, []);
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-50 bg-black/50 transition-opacity overflow-hidden flex items-center justify-center"
       style={{ overscrollBehavior: "contain" }}
@@ -53,6 +47,8 @@ export default function Modal({ children, onClose, className }: ModalProps) {
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.getElementById("modal-root")!);
 }
 
 // 서브 컴포넌트 연결

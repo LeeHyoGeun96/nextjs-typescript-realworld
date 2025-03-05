@@ -7,6 +7,7 @@ import { SearchParams } from "@/types/global";
 import { optionalAuthHeaders } from "@/utils/auth/optionalAuthHeaders";
 import { parseQueryParams } from "@/utils/parseQueryParams";
 import { cookies } from "next/headers";
+import SWRProvider from "@/lib/swr/SWRProvider";
 
 export default async function HomePage({
   searchParams,
@@ -52,47 +53,49 @@ export default async function HomePage({
   };
 
   return (
-    <div>
-      {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
+    <SWRProvider fallback={fallback}>
+      <div>
+        {/* 헤더 섹션 - 컴포넌트로 분리 가능 */}
 
-      <header className="bg-brand-primary dark:bg-gray-800 shadow-inner ">
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="font-logo text-5xl md:text-6xl lg:text-7xl text-white mb-4 font-bold">
-            conduit
-          </h1>
-          <p className="text-white text-xl md:text-2xl font-light">
-            A place to share your knowledge.
-          </p>
-        </div>
-      </header>
-      {/* 메인 콘텐츠 */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* 모바일 태그 선택 */}
-          <div className="lg:hidden overflow-x-auto -mx-4 px-4">
-            <SelectTag tags={tags} />
+        <header className="bg-brand-primary dark:bg-gray-800 shadow-inner ">
+          <div className="container mx-auto px-4 py-12 text-center">
+            <h1 className="font-logo text-5xl md:text-6xl lg:text-7xl text-white mb-4 font-bold">
+              conduit
+            </h1>
+            <p className="text-white text-xl md:text-2xl font-light">
+              A place to share your knowledge.
+            </p>
           </div>
-
-          {/* 사이드바 왼쪽 공간 */}
-          <div className="hidden lg:block lg:w-64"></div>
-
-          {/* 메인 콘텐츠 영역 */}
-          <div className="flex-1 max-w-3xl mx-auto w-full justify-center">
-            <FeedToggle params={{ tab, tag }} isLoggedIn={!!token} />
-            <ArticleList apiKeys={apiKeys} tab={tab} initialData={fallback} />
-            <div className="mt-8">
-              <Pagination total={articlesCount} limit={10} />
+        </header>
+        {/* 메인 콘텐츠 */}
+        <main className="container mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* 모바일 태그 선택 */}
+            <div className="lg:hidden overflow-x-auto -mx-4 px-4">
+              <SelectTag tags={tags} />
             </div>
+
+            {/* 사이드바 왼쪽 공간 */}
+            <div className="hidden lg:block lg:w-64"></div>
+
+            {/* 메인 콘텐츠 영역 */}
+            <div className="flex-1 max-w-3xl mx-auto w-full justify-center">
+              <FeedToggle params={{ tab, tag }} isLoggedIn={!!token} />
+              <ArticleList apiKeys={apiKeys} tab={tab} />
+              <div className="mt-8">
+                <Pagination total={articlesCount} limit={10} />
+              </div>
+            </div>
+
+            {/* 사이드바 오른쪽 */}
+            <aside className="hidden lg:block lg:w-64 ">
+              <div className="lg:sticky lg:top-24">
+                <SelectTag tags={tags} selectedTag={tag} />
+              </div>
+            </aside>
           </div>
-
-          {/* 사이드바 오른쪽 */}
-          <aside className="hidden lg:block lg:w-64 ">
-            <div className="lg:sticky lg:top-24">
-              <SelectTag tags={tags} selectedTag={tag} />
-            </div>
-          </aside>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </SWRProvider>
   );
 }

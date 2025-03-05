@@ -1,18 +1,18 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
 import { ValidationError } from "@/types/error";
 import { validateSignup } from "@/utils/validations";
-import { PasswordStrength } from "../PasswordStrength";
+import { PasswordStrengthBar } from "../PasswordStrengthBar";
 
 const SignupForm = () => {
+  const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(signUp, {
-    error: undefined,
     value: {
       inputData: {
         username: "",
@@ -21,10 +21,11 @@ const SignupForm = () => {
         passwordConfirm: "",
       },
     },
-    success: undefined,
+    success: false,
   });
 
   const [isValid, setIsValid] = useState(false);
+  const [isSubmited, setIsSubmited] = useState(false);
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
@@ -44,6 +45,7 @@ const SignupForm = () => {
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setIsSubmited(true);
     if (!isValid) {
       e.preventDefault(); // ❌ 클라이언트 벨리데이션 실패 시, 폼 제출 차단
     }
@@ -57,26 +59,27 @@ const SignupForm = () => {
 
   return (
     <AuthFormWrapper
-      title="Sign up"
-      switchText="Have an account?"
+      title="회원가입"
+      switchText="이미 계정이 있으신가요?"
       switchLink="/login"
       onSubmit={handleSubmit}
       action={formAction}
       error={state.error?.message}
       isPending={isPending}
-      clientIsValid={isValid}
+      clientIsValid={true}
     >
       <InputWithError
         errorMessage={
-          clientErrors["username"] ??
-          (state.error?.name === "ValidationError"
+          isSubmited && clientErrors["username"]
+            ? clientErrors["username"]
+            : state.error?.name === "ValidationError"
             ? (state.error as ValidationError)?.fieldErrors?.username
-            : "")
+            : ""
         }
         props={{
           type: "text",
           name: "username",
-          placeholder: "Username",
+          placeholder: "닉네임",
           required: true,
           defaultValue: state?.value?.inputData?.username || "",
           onChange: handleChange,
@@ -84,15 +87,16 @@ const SignupForm = () => {
       />
       <InputWithError
         errorMessage={
-          clientErrors["email"] ??
-          (state.error?.name === "ValidationError"
+          isSubmited && clientErrors["email"]
+            ? clientErrors["email"]
+            : state.error?.name === "ValidationError"
             ? (state.error as ValidationError)?.fieldErrors?.email
-            : "")
+            : ""
         }
         props={{
           type: "email",
           name: "email",
-          placeholder: "Email",
+          placeholder: "이메일",
           autoComplete: "email",
           required: true,
           defaultValue: state?.value?.inputData?.email || "",
@@ -101,24 +105,26 @@ const SignupForm = () => {
       />
       <InputWithError
         errorMessage={
-          clientErrors["password"] ??
-          (state.error?.name === "ValidationError"
+          clientErrors["password"]
+            ? clientErrors["password"]
+            : state.error?.name === "ValidationError"
             ? (state.error as ValidationError)?.fieldErrors?.password
-            : "")
+            : ""
         }
         props={{
           type: "password",
           name: "password",
-          placeholder: "Password",
+          placeholder: "비밀번호",
           autoComplete: "new-password",
           required: true,
           defaultValue: state?.value?.inputData?.password || "",
           onChange: handleChange,
           minLength: 8,
           maxLength: 64,
+          ref: passwordRef,
         }}
       />
-      <PasswordStrength password={state?.value?.inputData?.password || ""} />
+      <PasswordStrengthBar password={passwordRef.current?.value || ""} />
       <InputWithError
         errorMessage={
           clientErrors["passwordConfirm"] ??
@@ -129,7 +135,7 @@ const SignupForm = () => {
         props={{
           type: "password",
           name: "passwordConfirm",
-          placeholder: "Password Confirm",
+          placeholder: "비밀번호 확인",
           autoComplete: "new-password",
           required: true,
           defaultValue: state?.value?.inputData?.passwordConfirm || "",

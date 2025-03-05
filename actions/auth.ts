@@ -65,7 +65,7 @@ export async function signUp(
 
     if (!response.ok) {
       const errorMessage =
-        translateError(responseData.errors) || "회원가입에 실패했습니다.";
+        translateError(responseData.error) || "회원가입에 실패했습니다.";
       return {
         success: false,
         error: new Error(errorMessage),
@@ -120,8 +120,9 @@ export async function login(
     const responseData = await response.json();
 
     if (!response.ok) {
+      console.log("서버에서 온 에러", responseData);
       const errorMessage =
-        translateError(responseData.errors) || "로그인에 실패했습니다.";
+        translateError(responseData.error) || "로그인에 실패했습니다.";
       return {
         success: false,
         error: new Error(errorMessage),
@@ -202,8 +203,9 @@ export async function updatePassword(
     const responseData = await response.json();
 
     if (!response.ok) {
+      console.error("서버에서 온 에러", responseData);
       const errorMessage =
-        translateError(responseData.errors) ||
+        translateError(responseData.error) ||
         "패스워드 업데이트에 실패했습니다.";
       return {
         success: false,
@@ -269,8 +271,7 @@ export async function updateProfile(
 
     if (!response.ok) {
       const errorMessage =
-        translateError(responseData.errors) ||
-        "프로필 업데이트에 실패했습니다.";
+        translateError(responseData.error) || "프로필 업데이트에 실패했습니다.";
       return {
         success: false,
         error: new Error(errorMessage),
@@ -314,7 +315,7 @@ export async function deleteAccount(userId: string) {
 
     if (!response.ok) {
       const errorMessage =
-        translateError(responseData.errors) || "회원 탈퇴에 실패했습니다.";
+        translateError(responseData.error) || "회원 탈퇴에 실패했습니다.";
       return {
         success: false,
         error: new Error(errorMessage),

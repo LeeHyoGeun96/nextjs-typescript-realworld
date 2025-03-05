@@ -30,8 +30,8 @@ const LoginForm = () => {
 
   return (
     <AuthFormWrapper
-      title="Sign in"
-      switchText="Need an account?"
+      title="로그인"
+      switchText="회원가입이 필요하신가요?"
       switchLink="/register"
       action={formAction}
       error={state.error?.message}
@@ -42,7 +42,7 @@ const LoginForm = () => {
         props={{
           type: "email",
           name: "email",
-          placeholder: "Email",
+          placeholder: "이메일",
           autoComplete: "email",
           required: true,
           defaultValue: state?.value?.inputData?.email || "",
@@ -52,7 +52,7 @@ const LoginForm = () => {
         props={{
           type: "password",
           name: "password",
-          placeholder: "Password",
+          placeholder: "비밀번호",
           autoComplete: "current-password",
           required: true,
         }}

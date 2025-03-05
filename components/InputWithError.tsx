@@ -6,7 +6,8 @@ import { ErrorDisplay } from "./ErrorDisplay";
 
 interface InputWithErrorProps {
   errorMessage?: string;
-  props: InputHTMLAttributes<HTMLInputElement>;
+  props: InputHTMLAttributes<HTMLInputElement> &
+    React.RefAttributes<HTMLInputElement>;
   className?: string;
 }
 
@@ -21,7 +22,7 @@ export const InputWithError = ({
         {...props}
         className={`${props.className || ""} ${
           errorMessage
-            ? " border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500"
+            ? " border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:ring-red-500 dark:focus:border-red-500 dark:focus:ring-red-500"
             : ""
         }`}
       />

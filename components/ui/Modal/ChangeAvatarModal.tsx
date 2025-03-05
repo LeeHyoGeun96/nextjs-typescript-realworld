@@ -24,7 +24,11 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
-export default function AvatarModalPage() {
+interface ChangeAvatarModalProps {
+  onClose: () => void;
+}
+
+export default function ChangeAvatarModal({ onClose }: ChangeAvatarModalProps) {
   const router = useRouter();
   const { imageData, setCroppedImage, croppedImage } = useAvatar();
   const { user, mutate } = useUser();
@@ -76,16 +80,15 @@ export default function AvatarModalPage() {
           revalidate: false,
         }
       );
-
-      router.back();
     } else {
       toast.error("파일이 선택되지 않았습니다");
     }
+    onClose();
   };
 
   return (
-    <Modal>
-      <Modal.Header>프로필 이미지 업데이트</Modal.Header>
+    <Modal onClose={onClose}>
+      <Modal.Header onClose={onClose}>프로필 이미지 업데이트</Modal.Header>
       <Modal.Content className="w-full relative">
         {imageData && (
           <>

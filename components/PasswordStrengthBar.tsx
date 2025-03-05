@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import zxcvbn from "zxcvbn";
 
-export function PasswordStrength({ password }: { password: string }) {
+export function PasswordStrengthBar({ password }: { password: string }) {
   const [score, setScore] = useState(0);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function PasswordStrength({ password }: { password: string }) {
   ][score];
 
   return (
-    <div className="h-1 w-full bg-gray-200 mt-2">
+    <div className="h-1 w-full bg-gray-200">
       <div
         className={`h-full ${strengthColor} transition-all`}
         style={{ width: `${(score + 1) * 20}%` }}
