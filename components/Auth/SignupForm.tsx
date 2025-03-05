@@ -1,15 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
 import { ValidationError } from "@/types/error";
 import { validateSignup } from "@/utils/validations";
-import { PasswordStrength } from "../PasswordStrength";
+import { PasswordStrengthBar } from "../PasswordStrengthBar";
 
 const SignupForm = () => {
+  const passwordRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(signUp, {
     value: {
@@ -115,9 +116,10 @@ const SignupForm = () => {
           onChange: handleChange,
           minLength: 8,
           maxLength: 64,
+          ref: passwordRef,
         }}
       />
-      <PasswordStrength password={state?.value?.inputData?.password || ""} />
+      <PasswordStrengthBar password={passwordRef.current?.value || ""} />
       <InputWithError
         errorMessage={
           clientErrors["passwordConfirm"] ??

@@ -203,6 +203,7 @@ export async function updatePassword(
     const responseData = await response.json();
 
     if (!response.ok) {
+      console.error("서버에서 온 에러", responseData);
       const errorMessage =
         translateError(responseData.error) ||
         "패스워드 업데이트에 실패했습니다.";

@@ -14,7 +14,6 @@ import {
 
 import { useEffect, useState } from "react";
 
-console.log("실행됨");
 const CHECK_TEXT = "탈퇴하겠습니다";
 
 interface DeleteUserModalProps {

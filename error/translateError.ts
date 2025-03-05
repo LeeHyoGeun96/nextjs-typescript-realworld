@@ -45,6 +45,9 @@ const errorMessages: ErrorMessages = {
     "not found": "댓글을 찾을 수 없습니다",
     "can't be blank": "댓글 내용을 입력해주세요",
   },
+  "current password": {
+    "is invalid": "현재 비밀번호가 올바르지 않습니다",
+  },
 };
 
 /**

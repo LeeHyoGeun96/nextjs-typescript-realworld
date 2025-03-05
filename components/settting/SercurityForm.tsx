@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button/Button";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { updatePassword } from "@/actions/auth";
 import { UpdatePasswordState } from "@/types/authTypes";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
@@ -11,6 +11,8 @@ import { ValidationError } from "@/types/error";
 import { validatePassword } from "@/utils/validations";
 import logout from "@/utils/auth/authUtils";
 import DeleteUserModal from "../ui/Modal/DeleteUserModal";
+import { toast } from "sonner";
+import { PasswordStrengthBar } from "../PasswordStrengthBar";
 
 const initialState: UpdatePasswordState = {
   error: undefined,
@@ -25,6 +27,7 @@ const initialState: UpdatePasswordState = {
 };
 
 export default function SecurityForm() {
+  const passwordRef = useRef<HTMLInputElement>(null);
   const [state, formAction, isPending] = useActionState(
     updatePassword,
     initialState
@@ -34,6 +37,12 @@ export default function SecurityForm() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [isValid, setIsValid] = useState(false);
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success("비밀번호가 변경되었습니다.");
+    }
+  }, [state]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formData = new FormData(e.currentTarget.form!);
@@ -90,10 +99,14 @@ export default function SecurityForm() {
               name: "password",
               placeholder: "새로운 비밀번호",
               defaultValue: state.value?.inputData.password,
+              ref: passwordRef,
               onChange: handleChange,
             }}
             className="mb-4"
           />
+          <div className="mb-4">
+            <PasswordStrengthBar password={passwordRef.current?.value || ""} />
+          </div>
           <InputWithError
             errorMessage={
               clientErrors["passwordConfirm"] ??

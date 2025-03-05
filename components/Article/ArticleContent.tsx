@@ -39,7 +39,7 @@ export default function ArticleContent({ apiKeys }: ArticleProps) {
   const { isLoggedIn } = useUser();
 
   const articleData = articleResponse?.article;
-  console.log("articleData", articleData);
+
   const {
     data: profileResponse,
     mutate: mutateProfile,

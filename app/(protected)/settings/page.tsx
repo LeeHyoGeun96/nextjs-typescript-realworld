@@ -6,7 +6,7 @@ export default function SettingsPage() {
   return (
     <>
       <h1 className="text-5xl text-center text-gray-800 dark:text-gray-100 mb-8">
-        Settings
+        설정
       </h1>
       <div className="flex gap-8 flex-col">
         <section className="border-2 border-brand-primary p-8 rounded-lg shadow-lg">

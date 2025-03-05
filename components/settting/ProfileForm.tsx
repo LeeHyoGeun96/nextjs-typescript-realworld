@@ -81,7 +81,7 @@ export default function SettingForm() {
             <Input
               id="username"
               type="text"
-              placeholder="Your Name"
+              placeholder="사용자 이름"
               defaultValue={user?.username || ""}
               name="username"
               autoComplete="username"
@@ -95,7 +95,7 @@ export default function SettingForm() {
             <Input
               id="bio"
               isTextArea
-              placeholder="Short bio about you"
+              placeholder="자기소개"
               defaultValue={user?.bio || ""}
               name="bio"
               className="min-h-[200px]"

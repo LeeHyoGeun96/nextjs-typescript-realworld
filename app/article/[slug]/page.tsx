@@ -44,8 +44,6 @@ export default async function ArticlePage({ params }: { params: Params }) {
     [apiKeys.article]: articleResponse,
   };
 
-  console.log("articleResponse", articleResponse);
-
   return (
     <SWRProvider fallback={fallback}>
       <ArticleContent apiKeys={apiKeys} />
