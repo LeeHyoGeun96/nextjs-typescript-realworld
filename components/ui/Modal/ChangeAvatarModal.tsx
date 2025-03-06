@@ -11,7 +11,7 @@ import {
   handleApiError,
   handleUnexpectedError,
 } from "@/utils/error/errorHandle";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { useState } from "react";
 import { toast } from "sonner";
 

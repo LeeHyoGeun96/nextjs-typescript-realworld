@@ -9,7 +9,7 @@ import { favoriteArticle, unfavoriteArticle } from "@/actions/article";
 
 import TagList from "./ui/tag/TagList";
 import { useUser } from "@/hooks/useUser";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import {
   handleApiError,
   handleUnexpectedError,
@@ -61,7 +61,7 @@ export default function ArticleList({
         "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
       );
       if (!confirm) return;
-      router.push("/login");
+      router.push("/login", { showProgress: true });
       return;
     }
 

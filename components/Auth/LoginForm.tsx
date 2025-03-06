@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState } from "react";
+import { useRouter } from "@bprogress/next/app";
 import { login } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
@@ -21,12 +21,10 @@ const LoginForm = () => {
     error: null,
   });
 
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/");
-      mutate();
-    }
-  }, [state?.success, router, mutate]);
+  if (state?.success) {
+    router.push("/", { showProgress: true });
+    mutate();
+  }
 
   return (
     <AuthFormWrapper

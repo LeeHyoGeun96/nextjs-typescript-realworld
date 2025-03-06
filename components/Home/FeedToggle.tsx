@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 
 interface FeedToggleProps {
   params: {
@@ -21,7 +21,7 @@ const FeedToggle = ({ params, isLoggedIn }: FeedToggleProps) => {
   const handleStateChange = (tab: "global" | "personal") => {
     const current = new URLSearchParams();
     current.set("tab", tab);
-    router.push(`?${current.toString()}`);
+    router.push(`?${current.toString()}`, { showProgress: true });
   };
 
   const baseTabStyle = "inline-block px-4 py-2 transition-colors duration-200";

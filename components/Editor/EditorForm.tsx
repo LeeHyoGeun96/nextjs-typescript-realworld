@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
+import { useRouter } from "@bprogress/next/app";
 import { Button } from "../ui/Button/Button";
 import TagList from "../ui/tag/TagList";
 import { ArticleType, updateArticleState } from "@/types/articleTypes";
@@ -47,15 +47,13 @@ export function EditorForm({ initialData, slug }: EditorFormProps) {
   const MAX_TAG_COUNT = 10;
   const isMaxTag = tagList.length > MAX_TAG_COUNT;
 
-  useEffect(() => {
-    if (state.success) {
-      if (slug) {
-        router.push(`/article/${slug}`);
-      } else {
-        router.push("/");
-      }
+  if (state.success) {
+    if (slug) {
+      router.push(`/article/${slug}`, { showProgress: true });
+    } else {
+      router.push("/", { showProgress: true });
     }
-  }, [state.success, slug, router]);
+  }
 
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTagInput(e.target.value);

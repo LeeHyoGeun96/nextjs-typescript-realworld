@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useRef, useState } from "react";
+import { useRouter } from "@bprogress/next/app";
 import { signUp } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
 import { InputWithError } from "../InputWithError";
@@ -29,6 +29,10 @@ const SignupForm = () => {
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
+  if (state?.success) {
+    router.push("/login", { showProgress: true });
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formData = new FormData(e.currentTarget.form!);
     const values = Object.fromEntries(formData) as Record<string, string>;
@@ -50,12 +54,6 @@ const SignupForm = () => {
       e.preventDefault(); // ❌ 클라이언트 벨리데이션 실패 시, 폼 제출 차단
     }
   };
-
-  useEffect(() => {
-    if (state?.success) {
-      router.push("/login");
-    }
-  }, [state?.success, router]);
 
   return (
     <AuthFormWrapper

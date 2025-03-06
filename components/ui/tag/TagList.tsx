@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { memo, useCallback } from "react";
 import { MdClose } from "react-icons/md";
 
@@ -38,7 +38,7 @@ const TagList = memo(
 
         const current = new URLSearchParams();
         current.set("tag", tag);
-        router.push(`/?${current.toString()}`);
+        router.push(`/?${current.toString()}`, { showProgress: true });
       },
       [router, isEditMode, selectedTag]
     );

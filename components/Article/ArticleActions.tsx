@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import { useUser } from "@/hooks/useUser";
 import { ProfileType } from "@/types/profileTypes";
 import { ArticleType } from "@/types/articleTypes";
@@ -32,7 +32,7 @@ export default function ArticleActions({
       "로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?"
     );
     if (confirmed) {
-      router.push("/login");
+      router.push("/login", { showProgress: true });
     }
   };
 

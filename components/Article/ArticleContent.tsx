@@ -8,7 +8,7 @@ import Avatar from "../ui/Avata/Avatar";
 import ArticleActions from "./ArticleActions";
 import CommentsContainer from "@/components/Comments/index";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@bprogress/next/app";
 import {
   deleteArticle,
   favoriteArticle,
@@ -68,7 +68,7 @@ export default function ArticleContent({ apiKeys }: ArticleProps) {
         "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
       );
       if (!confirm) return;
-      router.push("/login");
+      router.push("/login", { showProgress: true });
       return;
     }
 
@@ -157,7 +157,7 @@ export default function ArticleContent({ apiKeys }: ArticleProps) {
         "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
       );
       if (!confirm) return;
-      router.push("/login");
+      router.push("/login", { showProgress: true });
       return;
     }
 
@@ -213,7 +213,7 @@ export default function ArticleContent({ apiKeys }: ArticleProps) {
         "로그인 후 이용해주세요. 로그인하러 가시겠습니까?"
       );
       if (!confirm) return;
-      router.push("/login");
+      router.push("/login", { showProgress: true });
     }
 
     const confirm = window.confirm("정말 삭제하시겠습니까?");
@@ -225,7 +225,7 @@ export default function ArticleContent({ apiKeys }: ArticleProps) {
       if (window.history.length > 1) {
         router.back();
       } else {
-        router.push("/");
+        router.push("/", { showProgress: true });
       }
     } catch (error) {
       handleUnexpectedError(error, "삭제 처리", setUnExpectedError);
