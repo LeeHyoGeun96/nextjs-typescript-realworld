@@ -19,7 +19,6 @@ const FeedToggle = ({ params, isLoggedIn }: FeedToggleProps) => {
   const currentTag = params?.tag ?? "";
 
   const handleStateChange = (tab: "global" | "personal") => {
-    if (currentTab === tab) return;
     const current = new URLSearchParams();
     current.set("tab", tab);
     router.push(`?${current.toString()}`);
