@@ -2,7 +2,7 @@
 
 이 프로젝트는 Next.js를 이용하여 구현한 실제 블로그 플랫폼으로, Medium.com과 같은 사용자 경험을 제공합니다. RealWorld 명세를 따라 구현되었으며, 사용자 인증, 게시글 작성, 댓글, 프로필 관리 등 실제 애플리케이션에서 필요한 모든 기능을 포함하고 있습니다.
 
-링크 - https://nextjs-typescript-realworld-git-f-16bb8b-leehyogeun96s-projects.vercel.app/
+링크 - https://nextjs-typescript-realworld.vercel.app/
 
 ## 기술 스택
 
