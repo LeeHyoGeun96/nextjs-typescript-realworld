@@ -6,6 +6,7 @@ import ToastProvider from "@/lib/sonner/ToastProvider";
 import SWRProvider from "@/lib/swr/SWRProvider";
 import { cookies } from "next/headers";
 import { API_ENDPOINTS } from "@/constant/api";
+import Providers from "@/lib/nextProgressBar/ProgressbarProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -105,10 +106,12 @@ export default async function RootLayout({
         />
         <body>
           <SWRProvider fallback={fallback}>
-            <Header />
-            <main className="dark:bg-gray-900 min-h-screen">{children}</main>
-            <div id="modal-root" />
-            <ToastProvider />
+            <Providers>
+              <Header />
+              <main className="dark:bg-gray-900 min-h-screen">{children}</main>
+              <div id="modal-root" />
+              <ToastProvider />
+            </Providers>
           </SWRProvider>
         </body>
       </head>
