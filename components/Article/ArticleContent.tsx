@@ -203,6 +203,7 @@ export default function ArticleContent({ apiKeys }: ArticleProps) {
         },
         rollbackOnError: true,
         revalidate: false,
+        populateCache: true,
       }
     );
   };
