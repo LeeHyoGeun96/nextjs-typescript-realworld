@@ -70,7 +70,7 @@ export default function CommentsContainer({ slug, apiKeys }: CommentsProps) {
     };
 
     await mutate(
-      async (prevData: CommentsResponse | undefined) => {
+      async () => {
         try {
           const commentResponse = await addComment(commentText, slug);
           handleApiError(commentResponse, "댓글 추가에 실패했습니다.");
@@ -80,17 +80,19 @@ export default function CommentsContainer({ slug, apiKeys }: CommentsProps) {
           }
 
           return {
-            comments: [comment, ...(prevData?.comments || [])],
+            comments: [comment, ...(CommentsResponse?.comments || [])],
           };
         } catch (error) {
           handleUnexpectedError(error, "댓글 추가", setUnexpectError);
         }
       },
       {
-        optimisticData: (prevData) => {
-          if (!prevData) return { comments: [optimisticComment] };
+        optimisticData: () => {
           return {
-            comments: [optimisticComment, ...prevData.comments],
+            comments: [
+              optimisticComment,
+              ...(CommentsResponse?.comments || []),
+            ],
           };
         },
         rollbackOnError: true,
@@ -113,23 +115,25 @@ export default function CommentsContainer({ slug, apiKeys }: CommentsProps) {
 
     // 낙관적 업데이트
     await mutate(
-      async (prevData) => {
-        if (!prevData) return { comments: [] };
+      async () => {
         try {
           const deleteResponse = await deleteComment(id, slug);
           handleApiError(deleteResponse, "댓글 삭제에 실패했습니다.");
           return {
-            comments: prevData.comments.filter((comment) => comment.id !== id),
+            comments: CommentsResponse?.comments.filter(
+              (comment) => comment.id !== id
+            ) as CommentsResponse["comments"],
           };
         } catch (error) {
           handleUnexpectedError(error, "댓글 삭제", setUnexpectError);
         }
       },
       {
-        optimisticData: (prevData) => {
-          if (!prevData) return { comments: [] };
+        optimisticData: () => {
           return {
-            comments: prevData.comments.filter((comment) => comment.id !== id),
+            comments: CommentsResponse?.comments.filter(
+              (comment) => comment.id !== id
+            ) as CommentsResponse["comments"],
           };
         },
         rollbackOnError: true,

@@ -21,6 +21,7 @@ export const useUser = () => {
   const user = data?.user;
 
   return {
+    userResponse: data,
     user,
     error,
     isLoggedIn: !!user,

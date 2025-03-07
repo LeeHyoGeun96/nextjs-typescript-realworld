@@ -10,10 +10,9 @@ import {
   handleApiError,
   handleUnexpectedError,
 } from "@/utils/error/errorHandle";
-import { ResponseUserType } from "@/types/authTypes";
 
 export default function SettingForm() {
-  const { user, mutate } = useUser();
+  const { user, userResponse, mutate } = useUser();
   const [error, setError] = useState<string | null>(null);
   const [unexpectError, setUnexpectError] = useState<string | null>(null);
 
@@ -34,7 +33,7 @@ export default function SettingForm() {
     }
 
     await mutate(
-      async (prevData: ResponseUserType | undefined) => {
+      async () => {
         try {
           const updateProfileResponse = await updateProfile(formData);
 
@@ -46,8 +45,8 @@ export default function SettingForm() {
 
           return (
             updateProfileResponse.value?.responseData || {
-              ...prevData,
-              user: { ...prevData?.user, ...newUser },
+              ...userResponse,
+              user: { ...userResponse?.user, ...newUser },
             }
           );
         } catch (error) {
@@ -55,10 +54,10 @@ export default function SettingForm() {
         }
       },
       {
-        optimisticData: (prevData: ResponseUserType | undefined) => {
+        optimisticData: () => {
           return {
-            ...prevData,
-            user: { ...prevData?.user, ...newUser },
+            ...userResponse,
+            user: { ...userResponse?.user, ...newUser },
           };
         },
         rollbackOnError: true,

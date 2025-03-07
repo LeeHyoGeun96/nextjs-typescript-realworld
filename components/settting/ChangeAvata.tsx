@@ -7,7 +7,7 @@ import { Button } from "../ui/Button/Button";
 import Avatar from "../ui/Avata/Avatar";
 import { deleteAvatar } from "@/actions/storage";
 import { useUser } from "@/hooks/useUser";
-import { ResponseUserType } from "@/types/authTypes";
+
 import {
   handleApiError,
   handleUnexpectedError,
@@ -16,7 +16,7 @@ import ChangeAvatarModal from "../ui/Modal/ChangeAvatarModal";
 export default function ChangeAvata() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setImageData } = useAvatar();
-  const { user, mutate: boundMutate } = useUser();
+  const { user, mutate: boundMutate, userResponse } = useUser();
   const [unexpectedError, setUnexpectedError] = useState<string | null>(null);
   const [showChangeAvatarModal, setShowChangeAvatarModal] = useState(false);
 
@@ -42,18 +42,14 @@ export default function ChangeAvata() {
 
   const handleDeleteAvatar = async () => {
     await boundMutate(
-      async (prevData: ResponseUserType | undefined) => {
-        if (!prevData) {
-          throw new Error("사용자 데이터를 찾을 수 없습니다");
-        }
-
+      async () => {
         try {
           const deleteAvatarResponse = await deleteAvatar(user.id);
           handleApiError(deleteAvatarResponse, "프로필 이미지 삭제 실패");
 
           return {
-            ...prevData,
-            user: { ...prevData?.user, image: null },
+            ...userResponse,
+            user: { ...userResponse?.user, image: null },
           };
         } catch (error) {
           handleUnexpectedError(
@@ -64,9 +60,9 @@ export default function ChangeAvata() {
         }
       },
       {
-        optimisticData: (prevData: ResponseUserType | undefined) => ({
-          ...prevData,
-          user: { ...prevData?.user, image: null },
+        optimisticData: () => ({
+          ...userResponse,
+          user: { ...userResponse?.user, image: null },
         }),
         rollbackOnError: true,
         revalidate: false,
