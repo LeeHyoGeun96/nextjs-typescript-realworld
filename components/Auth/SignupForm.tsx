@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useRef, useState, useEffect } from "react";
 import { useRouter } from "@bprogress/next/app";
 import { signUp } from "@/actions/auth";
 import { AuthFormWrapper } from "./Common";
@@ -29,9 +29,11 @@ const SignupForm = () => {
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
-  if (state?.success) {
-    router.push("/login", { showProgress: true });
-  }
+  useEffect(() => {
+    if (state?.success) {
+      router.push("/login", { showProgress: true });
+    }
+  }, [state?.success, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formData = new FormData(e.currentTarget.form!);
